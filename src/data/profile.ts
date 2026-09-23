@@ -3,7 +3,7 @@ export const profile = {
   name: "Suresh Ganesan",
   title: "Senior Supply Chain / Procurement Professional",
   tagline: "Strategic sourcing, technical & commercial procurement, CAPEX/OPEX, P2P, contracts and international SCM.",
-  location: "Pattukkottai, Tamil Nadu, India",
+  location: "Chennai, Tamil Nadu, India",
   email: "mailmesuresh005@gmail.com",
   phones: ["+91 9787932244", "+65 80923216"],
   linkedin: "https://www.linkedin.com/in/suresh005/",
@@ -23,6 +23,22 @@ export const profile = {
 
 export const experience = [
   {
+      {
+    company: "ATMARTH TEKNIK SOLUTIONS PRIVATE LIMITED",
+    role: "Senior Procurement Executive (supporting client AirTrunk as Senior Procurement Manager)",
+    location: "ADD LOCATION",
+    dates: "August 2026 – Present",
+    bullets: [
+      "Led RFI activities on the Felix platform, including vendor stakeholder meetings, RFI preparation and dispatch, and vendor onboarding.",
+      "Managed vendor communication and documentation, and issued RFQs on Felix.",
+      "Conducted tender comparison and bid evaluation to shortlist vendors.",
+      "Drafted, negotiated and executed Work Orders (WO), Service Orders (SO) and Master Service Agreements (MSA) through Jira.",
+      "Completed Know Your Supplier (KYS) checks and NDAs with vendors.",
+      "Raised Purchase Orders in coordination with the ICT team.",
+      "Tracked supplier relationships and KPI deliverables, with Power BI dashboard updates.",
+      "Tools: Jira, NetGain, NetSuite, Compliance Catalyst, Felix, Power BI, Excel Query."
+    ]
+  },
     company: "FRANKLIN OFFSHORE INTERNATIONAL PTE LTD",
     role: "Procurement Engineer – Fabrication & Project Division",
     location: "Singapore",
