@@ -1,0 +1,16 @@
+{
+  "name": "Suresh Ganesan",
+  "source": "user-supplied resume and explicitly supplied profile links",
+  "verified_links": {
+    "linkedin": "https://www.linkedin.com/in/suresh005/",
+    "github_repository": "https://github.com/Chillbroz005/Backup-data",
+    "github_profile": "https://github.com/Chillbroz005"
+  },
+  "missing_or_source_limited": [
+    "Final resume PDF file",
+    "Verified project repository list beyond the supplied GitHub URL",
+    "Project screenshots/live demos",
+    "Detailed problem/technology/result data for case studies not present in the resume"
+  ],
+  "rule": "Do not invent personal information, experience, achievements, certifications, project results, technologies or statistics."
+}
