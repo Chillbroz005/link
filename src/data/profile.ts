@@ -11,12 +11,15 @@ export const profile = {
   githubProfile: "https://github.com/Chillbroz005",
   githubUsername: "Chillbroz005",
   experienceYears: "9 years",
+
   regions: ["India", "Singapore"],
+
   industries: [
     "Vertically integrated manufacturing",
     "Textiles",
     "Fabrication & projects"
   ],
+
   functions: [
     "Strategic sourcing",
     "Procurement",
@@ -26,6 +29,7 @@ export const profile = {
     "Vendor management",
     "IT procurement"
   ],
+
   achievements: [
     "Best Employee of the Year — 2019 & 2021",
     "Gold Award — QCFI Kaizen Mela, Madurai chapter, 2018",
@@ -56,7 +60,7 @@ export const experience = [
     company: "FRANKLIN OFFSHORE INTERNATIONAL PTE LTD",
     role: "Procurement Engineer – Fabrication & Project Division",
     location: "Singapore",
-    dates: "April 2025 – May 2026",
+    dates: "May 2025 – May 2026",
     bullets: [
       "Managed end-to-end procurement for fabrication projects including PR creation, PO conversion and material availability against drawings and BOM.",
       "Evaluated, onboarded and developed vendors using quality, cost, delivery performance and technical capability.",
@@ -74,7 +78,7 @@ export const experience = [
     company: "LOYAL TEXTILES MILLS LIMITED",
     role: "Assistant Manager – Purchase and Projects",
     location: "Chennai, Tamil Nadu, India",
-    dates: "June 2017 – March 2025",
+    dates: "June 2017 – May 2025",
     bullets: [
       "Developed strategic sourcing plans to optimize costs and supplier relationships.",
       "Managed procure-to-pay activities for CAPEX, OPEX and MEP requirements.",
@@ -101,20 +105,7 @@ export const tools = {
 
   analytics: [
     "Power BI",
-    "Excel Query",
-    "MS Office"
-  ],
-
-  erp: [
-    "NOW ERP 6.0",
-    "SAP HANA",
-    "Oracle EPB"
-  ],
-
-  engineering: [
-    "AutoCAD",
-    "SolidWorks",
-    "Oracle DBMS"
+    "Excel Query"
   ]
 } as const;
 
@@ -151,6 +142,16 @@ export const skills = [
   "ISO / QMS / EMS / OHSAS",
   "5S / Kaizen"
 ];
+
+
+export const software = [
+  "NOW ERP 6.0",
+  "MS Office",
+  "AutoCAD",
+  "Oracle DBMS",
+  "SAP HANA",
+  "SolidWorks"
+] as const;
 
 
 export const education = [
