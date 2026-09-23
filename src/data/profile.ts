@@ -1,8 +1,8 @@
-
 export const profile = {
   name: "Suresh Ganesan",
   title: "Senior Supply Chain / Procurement Professional",
-  tagline: "Strategic sourcing, technical & commercial procurement, CAPEX/OPEX, P2P, contracts and international SCM.",
+  tagline:
+    "Strategic sourcing, technical & commercial procurement, CAPEX/OPEX, P2P, contracts and international SCM.",
   location: "Chennai, Tamil Nadu, India",
   email: "mailmesuresh005@gmail.com",
   phones: ["+91 9787932244", "+65 80923216"],
@@ -12,8 +12,20 @@ export const profile = {
   githubUsername: "Chillbroz005",
   experienceYears: "9 years",
   regions: ["India", "Singapore"],
-  industries: ["Vertically integrated manufacturing", "Textiles", "Fabrication & projects"],
-  functions: ["Strategic sourcing", "Procurement", "P2P", "CAPEX/OPEX", "Contracts", "Vendor management", "IT procurement"],
+  industries: [
+    "Vertically integrated manufacturing",
+    "Textiles",
+    "Fabrication & projects"
+  ],
+  functions: [
+    "Strategic sourcing",
+    "Procurement",
+    "P2P",
+    "CAPEX/OPEX",
+    "Contracts",
+    "Vendor management",
+    "IT procurement"
+  ],
   achievements: [
     "Best Employee of the Year — 2019 & 2021",
     "Gold Award — QCFI Kaizen Mela, Madurai chapter, 2018",
@@ -21,11 +33,12 @@ export const profile = {
   ]
 } as const;
 
+
 export const experience = [
   {
-      {
     company: "ATMARTH TEKNIK SOLUTIONS PRIVATE LIMITED",
-    role: "Senior Procurement Executive (supporting client AirTrunk as Senior Procurement Manager)",
+    role:
+      "Senior Procurement Executive (supporting client AirTrunk as Senior Procurement Manager)",
     location: "ADD LOCATION",
     dates: "August 2026 – Present",
     bullets: [
@@ -35,10 +48,11 @@ export const experience = [
       "Drafted, negotiated and executed Work Orders (WO), Service Orders (SO) and Master Service Agreements (MSA) through Jira.",
       "Completed Know Your Supplier (KYS) checks and NDAs with vendors.",
       "Raised Purchase Orders in coordination with the ICT team.",
-      "Tracked supplier relationships and KPI deliverables, with Power BI dashboard updates.",
-      "Tools: Jira, NetGain, NetSuite, Compliance Catalyst, Felix, Power BI, Excel Query."
+      "Tracked supplier relationships and KPI deliverables, with Power BI dashboard updates."
     ]
   },
+
+  {
     company: "FRANKLIN OFFSHORE INTERNATIONAL PTE LTD",
     role: "Procurement Engineer – Fabrication & Project Division",
     location: "Singapore",
@@ -55,6 +69,7 @@ export const experience = [
       "Maintained procurement documentation for ISO audits and reporting; coordinated with finance for payment processing."
     ]
   },
+
   {
     company: "LOYAL TEXTILES MILLS LIMITED",
     role: "Assistant Manager – Purchase and Projects",
@@ -74,6 +89,36 @@ export const experience = [
   }
 ];
 
+
+export const tools = {
+  procurement: [
+    "Felix",
+    "Jira",
+    "NetGain",
+    "NetSuite",
+    "Compliance Catalyst"
+  ],
+
+  analytics: [
+    "Power BI",
+    "Excel Query",
+    "MS Office"
+  ],
+
+  erp: [
+    "NOW ERP 6.0",
+    "SAP HANA",
+    "Oracle EPB"
+  ],
+
+  engineering: [
+    "AutoCAD",
+    "SolidWorks",
+    "Oracle DBMS"
+  ]
+} as const;
+
+
 export const engagements = [
   "Modernization & Expansion Project (MEP) — 1800 Million",
   "AOP (CAPEX & Civil projects) — 1200 Million",
@@ -84,25 +129,78 @@ export const engagements = [
   "Work order for PICONOL N.V — 17,27,700 EURO"
 ];
 
+
 export const skills = [
-  "Supply Chain", "Strategic Sourcing", "Technical Procurement", "Commercial Procurement",
-  "CAPEX / OPEX", "Procure-to-Pay (P2P)", "Global Sourcing", "Vendor Management",
-  "Contract Management", "RFQ / RFP", "Inventory Management / Optimization", "MRP",
-  "Civil Contracts & Purchases", "O&M & Manpower Contracts", "IT Material & Software Licensing",
-  "MEP / Projects", "MIS Reporting", "ISO / QMS / EMS / OHSAS", "5S / Kaizen"
+  "Supply Chain",
+  "Strategic Sourcing",
+  "Technical Procurement",
+  "Commercial Procurement",
+  "CAPEX / OPEX",
+  "Procure-to-Pay (P2P)",
+  "Global Sourcing",
+  "Vendor Management",
+  "Contract Management",
+  "RFQ / RFP",
+  "Inventory Management / Optimization",
+  "MRP",
+  "Civil Contracts & Purchases",
+  "O&M & Manpower Contracts",
+  "IT Material & Software Licensing",
+  "MEP / Projects",
+  "MIS Reporting",
+  "ISO / QMS / EMS / OHSAS",
+  "5S / Kaizen"
 ];
 
-export const software = ["NOW ERP 6.0", "MS Office", "AutoCAD", "Oracle DBMS", "SAP HANA", "SolidWorks", "Power BI", "Oracle EPB"];
 
 export const education = [
-  {degree:"B.E., Mechanical Engineering", institution:"Agni College of Technology, Chennai", year:"2017", detail:"8 CGPA"},
-  {degree:"Higher Secondary Certificate", institution:"Government Higher Secondary School, Tanjore", year:"2013", detail:"86%"},
-  {degree:"Secondary School Leaving Certificate", institution:"Government Higher Secondary School, Tanjore", year:"2011", detail:"93%"}
+  {
+    degree: "B.E., Mechanical Engineering",
+    institution: "Agni College of Technology, Chennai",
+    year: "2017",
+    detail: "8 CGPA"
+  },
+  {
+    degree: "Higher Secondary Certificate",
+    institution: "Government Higher Secondary School, Tanjore",
+    year: "2013",
+    detail: "86%"
+  },
+  {
+    degree: "Secondary School Leaving Certificate",
+    institution: "Government Higher Secondary School, Tanjore",
+    year: "2011",
+    detail: "93%"
+  }
 ];
 
-export const certifications = ["Lean Six Sigma – Green Belt", "NDT", "PLC & SCADA"];
+
+export const certifications = [
+  "Lean Six Sigma – Green Belt",
+  "NDT",
+  "PLC & SCADA"
+];
+
 
 export const projects = [
-  {title:"Modernization & Expansion Project", category:"Procurement", description:"Procurement and project engagement documented in the resume.", technologies:[], github:""},
-  {title:"Fabrication & Project Procurement", category:"Procurement", description:"End-to-end procurement for fabrication projects, including PR-to-PO flow, vendor development, material coordination and documentation.", technologies:["P2P","RFQ/RFP","Vendor management"], github:""}
+  {
+    title: "Modernization & Expansion Project",
+    category: "Procurement",
+    description:
+      "Procurement and project engagement documented in the resume.",
+    technologies: [],
+    github: ""
+  },
+  {
+    title: "Fabrication & Project Procurement",
+    category: "Procurement",
+    description:
+      "End-to-end procurement for fabrication projects, including PR-to-PO flow, vendor development, material coordination and documentation.",
+    technologies: [
+      "P2P",
+      "RFQ/RFP",
+      "Vendor management"
+    ],
+    github: ""
+  }
 ];
