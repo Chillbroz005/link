@@ -121,15 +121,15 @@ export const projects = [
   {
     title: "Notification Logger",
     category: "Android",
-    description: "An Android app built in Kotlin that captures and logs all device notifications in real time. Designed for monitoring and automation use cases — useful for tracking alerts from any installed app without manual checking.",
-    technologies: ["Kotlin", "Android", "Automation", "Notifications API"],
+    description: "An Android app built in Kotlin that captures and logs all device notifications in real time. Runs as a background service and stores notification data locally — useful for auditing, monitoring and automation use cases across any installed app.",
+    technologies: ["Kotlin", "Android", "Notifications API", "Background Service"],
     github: "https://github.com/Chillbroz005/Notification_Logger"
   },
   {
     title: "Group Guardian & Filter Bot",
-    category: "Python",
-    description: "A Telegram bot built in Python that moderates group chats — filters unwanted messages, manages members, and enforces group rules automatically. Commercially deployed for real customer groups, demonstrating end-to-end bot development and deployment skills.",
-    technologies: ["Python", "Telegram Bot API", "Automation", "Flask"],
+    category: "Automation",
+    description: "A Telegram bot that automates group chat moderation — filters spam and unwanted messages, manages member actions, and enforces rules without any manual intervention. Commercially deployed for real customer groups.",
+    technologies: ["Python", "Telegram Bot API", "Flask", "Automation"],
     github: "https://github.com/Chillbroz005/Telegram-bot"
   },
   {
