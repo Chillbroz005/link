@@ -1,7 +1,7 @@
 export const profile = {
   name: "Suresh Ganesan",
   title: "Senior Supply Chain / Procurement Professional",
-  tagline: "Strategic sourcing, technical & commercial procurement, CAPEX/OPEX, P2P, contracts and international SCM, Funtional consultant",
+  tagline: "Strategic sourcing, technical & commercial procurement, CAPEX/OPEX, P2P, contracts and international SCM, Funstional consultant",
   location: "Chennai, Tamil Nadu, India",
   email: "mailmesuresh005@gmail.com",
   phones: ["+91 9787932244", "+65 80923216"],
