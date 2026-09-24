@@ -1,7 +1,7 @@
 export const profile = {
   name: "Suresh Ganesan",
   title: "Senior Supply Chain / Procurement Professional",
-  tagline: "Strategic sourcing, technical & commercial procurement, CAPEX/OPEX, P2P, contracts and international SCM, Funstional consultant",
+  tagline: "Strategic sourcing, technical & commercial procurement, CAPEX/OPEX, P2P, contracts and international SCM, Functional consultant",
   location: "Chennai, Tamil Nadu, India",
   email: "mailmesuresh005@gmail.com",
   phones: ["+91 9787932244", "+65 80923216"],
@@ -11,7 +11,7 @@ export const profile = {
   githubUsername: "Chillbroz005",
   experienceYears: "9 years",
   regions: ["Hong Kong", "Japan", "Singapore", "Australia", "Saudi Arabia", "Malaysia"],
-  industries: ["Manufacturing", "Textiles", "Fabrication","Manrine","Lifting gears"],
+  industries: ["Manufacturing", "Textiles", "Fabrication", "Marine", "Lifting gears"],
   functions: ["Strategic sourcing", "Procurement", "P2P", "CAPEX/OPEX", "Contracts", "Vendor management", "IT procurement", "Tender evaluation", "Contracts (WO / SO / MSA)", "Know Your Supplier (KYS)"],
   achievements: [
     "Best Employee of the Year — 2019 & 2021",
@@ -87,7 +87,8 @@ export const skills = [
   "CAPEX / OPEX", "Procure-to-Pay (P2P)", "Global Sourcing", "Vendor Management",
   "Contract Management", "RFQ / RFP", "Inventory Management / Optimization", "MRP",
   "Civil Contracts & Purchases", "O&M & Manpower Contracts", "IT Material & Software Licensing",
-  "MEP / Projects", "MIS Reporting", "Tender Evaluation", "KYS / Vendor Compliance", "ISO / QMS / EMS / OHSAS", "5S / Kaizen"
+  "MEP / Projects", "MIS Reporting", "Tender Evaluation", "KYS / Vendor Compliance",
+  "ISO / QMS / EMS / OHSAS", "5S / Kaizen"
 ];
 
 export const software = ["NOW ERP 6.0", "MS Office", "AutoCAD", "Oracle DBMS", "SAP HANA", "SolidWorks", "Power BI", "Oracle EPB"];
@@ -95,14 +96,47 @@ export const software = ["NOW ERP 6.0", "MS Office", "AutoCAD", "Oracle DBMS", "
 export const tools = ["Jira", "NetGain", "NetSuite", "Compliance Catalyst", "Felix", "Excel Query"];
 
 export const education = [
-  {degree:"B.E., Mechanical Engineering", institution:"Agni College of Technology, Chennai", year:"2017", detail:"8 CGPA"},
-  {degree:"Higher Secondary Certificate", institution:"Government Higher Secondary School, Tanjore", year:"2013", detail:"86%"},
-  {degree:"Secondary School Leaving Certificate", institution:"Government Higher Secondary School, Tanjore", year:"2011", detail:"93%"}
+  { degree: "B.E., Mechanical Engineering", institution: "Agni College of Technology, Chennai", year: "2017", detail: "8 CGPA" },
+  { degree: "Higher Secondary Certificate", institution: "Government Higher Secondary School, Tanjore", year: "2013", detail: "86%" },
+  { degree: "Secondary School Leaving Certificate", institution: "Government Higher Secondary School, Tanjore", year: "2011", detail: "93%" }
 ];
 
 export const certifications = ["Lean Six Sigma – Green Belt", "NDT", "PLC & SCADA"];
 
 export const projects = [
-  {title:"Modernization & Expansion Project", category:"Procurement", description:"Procurement and project engagement documented in the resume.", technologies:[], github:""},
-  {title:"Fabrication & Project Procurement", category:"Procurement", description:"End-to-end procurement for fabrication projects, including PR-to-PO flow, vendor development, material coordination and documentation.", technologies:["P2P","RFQ/RFP","Vendor management"], github:""}
+  {
+    title: "Modernization & Expansion Project",
+    category: "Procurement",
+    description: "Procurement and project engagement documented in the resume.",
+    technologies: [],
+    github: ""
+  },
+  {
+    title: "Fabrication & Project Procurement",
+    category: "Procurement",
+    description: "End-to-end procurement for fabrication projects, including PR-to-PO flow, vendor development, material coordination and documentation.",
+    technologies: ["P2P", "RFQ/RFP", "Vendor management"],
+    github: ""
+  },
+  {
+    title: "Notification Logger",
+    category: "Android",
+    description: "An Android app built in Kotlin that captures and logs all device notifications in real time. Designed for monitoring and automation use cases — useful for tracking alerts from any installed app without manual checking.",
+    technologies: ["Kotlin", "Android", "Automation", "Notifications API"],
+    github: "https://github.com/Chillbroz005/Notification_Logger"
+  },
+  {
+    title: "Group Guardian & Filter Bot",
+    category: "Python",
+    description: "A Telegram bot built in Python that moderates group chats — filters unwanted messages, manages members, and enforces group rules automatically. Commercially deployed for real customer groups, demonstrating end-to-end bot development and deployment skills.",
+    technologies: ["Python", "Telegram Bot API", "Automation", "Flask"],
+    github: "https://github.com/Chillbroz005/Telegram-bot"
+  },
+  {
+    title: "Personal Portfolio Website",
+    category: "Other",
+    description: "This portfolio — built from scratch using TypeScript and deployed via GitHub Pages. Dynamically loads GitHub repositories via the public API, features filterable project cards, an interactive career timeline, and a contact form. Demonstrates full front-end development capability alongside a professional procurement profile.",
+    technologies: ["TypeScript", "GitHub Pages", "GitHub API", "HTML", "CSS"],
+    github: "https://github.com/Chillbroz005/portfolio"
+  }
 ];
