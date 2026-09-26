@@ -270,7 +270,7 @@ export default function Home() {
       const currentSha = fileData.sha;
 
       // 2. Generate updated TS code
-      const updatedCode = `export const profile = ${JSON.stringify(profileData, null, 2)} as const;\n\nexport type ExperienceItem = {\n  company: string;\n  role: string;\n  location: string;\n  dates: string;\n  startDate: string;\n  endDate: string | null;\n  bullets: string[];\n};\n\nexport const experience: ExperienceItem[] = ${JSON.stringify(expList, null, 2)};\n\nexport const engagements = ${JSON.stringify(defaultEngagements, null, 2)};\n\nexport const skills = ${JSON.stringify(defaultSkills, null, 2)};\n\nexport const software = ${JSON.stringify(defaultSoftware, null, 2)};\n\nexport const tools = ${JSON.stringify(defaultTools, null, 2)};\n\nexport const education = ${JSON.stringify(defaultEducation, null, 2)};\n\nexport const certifications = ${JSON.stringify(defaultCertifications, null, 2)};\n\nexport const projects = ${JSON.stringify(defaultProjects, null, 2)};\n`;
+      const updatedCode = `export const profile = ${JSON.stringify(profileData, null, 2)} as const;\n\nexport type ExperienceItem = {\n  company: string;\n  role: string;\n  location: string;\n  dates: string;\n  startDate: string;\n  endDate: string | null;\n  bullets: string[];\n};\n\nexport const experience: ExperienceItem[] = ${JSON.stringify(expList, null, 2)};\n\nexport const engagements = ${JSON.stringify(defaultEngagements, null, 2)};\n\nexport const skills = ${JSON.stringify(skillsList, null, 2)};\n\nexport const software = ${JSON.stringify(defaultSoftware, null, 2)};\n\nexport const tools = ${JSON.stringify(defaultTools, null, 2)};\n\nexport const education = ${JSON.stringify(defaultEducation, null, 2)};\n\nexport const certifications = ${JSON.stringify(defaultCertifications, null, 2)};\n\nexport const projects = ${JSON.stringify(defaultProjects, null, 2)};\n`;
 
       // 3. Encode to base64
       const utf8Bytes = new TextEncoder().encode(updatedCode);
@@ -704,7 +704,7 @@ export default function Home() {
                     </div>
                   ) : (
                     <div onClick={() => setOpen(open === i ? -1 : i)} style={{ cursor: "pointer" }}>
-                      <span className="date-badge">{e.dates} ({calculateDuration(e.startDate, e.endDate)})</span>
+                      <span className="date-badge">{e.dates} <span style={{ opacity: 0.7 }}>• {calculateDuration(e.startDate, e.endDate)}</span></span>
                       <h3>{e.role}</h3>
                       <p>{e.company} · {e.location}</p>
                     </div>
