@@ -1,8 +1,8 @@
 export const profile = {
   "name": "Suresh Ganesan",
   "title": "Senior Supply Chain / Procurement Professional",
-  "summary": "Procurement and Supply Chain professional with 9 years of experience across manufacturing, fabrication projects, and international procurement. Experienced in strategic sourcing, technical and commercial procurement, CAPEX/OPEX, P2P, contract management, vendor development, and project procurement.",
-  "tagline": "Strategic sourcing, technical & commercial procurement, CAPEX/OPEX, P2P, contracts and international SCM, Functional consultant",
+  "summary": "Procurement and Supply Chain professional with 9+ years of experience across manufacturing, fabrication projects, and International sourcing Experienced in strategic sourcing, technical and commercial procurement, CAPEX/OPEX, P2P, Contract management, vendor development, and project procurement.",
+  "tagline": "Procurement and Supply Chain professional with 9 years of experience across\nmanufacturing, fabrication projects, and international procurement. Experienced in\nstrategic sourcing, technical and commercial procurement, CAPEX/OPEX, P2P,\ncontract management, vendor development, and project procurement. Seeking to\ncontribute my cross-functional and international experience to drive cost efficiency,\nsupplier performance, and timely project execution while growing into a broader\nprocurement leadership role",
   "location": "Chennai, Tamil Nadu, India",
   "email": "mailmesuresh005@gmail.com",
   "phones": [
