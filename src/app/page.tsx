@@ -5,9 +5,21 @@ import { BASE } from "../data/base";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUpRight, ChevronDown, Download, ExternalLink, Github,
-  Linkedin, Mail, MapPin, Menu, Moon, Phone, Send, Sun, X, Award, Briefcase, Cpu, Layers
+  Linkedin, Mail, MapPin, Menu, Moon, Phone, Send, Sun, X,
+  Edit3, Save, Plus, Trash2, Key, CheckCircle, AlertCircle, RefreshCw, Sparkles, Lock, Unlock
 } from "lucide-react";
-import { profile, experience, engagements, skills, software, tools, education, certifications, projects } from "../data/profile";
+import {
+  profile as defaultProfile,
+  experience as defaultExperience,
+  engagements as defaultEngagements,
+  skills as defaultSkills,
+  software as defaultSoftware,
+  tools as defaultTools,
+  education as defaultEducation,
+  certifications as defaultCertifications,
+  projects as defaultProjects,
+  ExperienceItem
+} from "../data/profile";
 
 const nav = [
   ["about", "About"],
@@ -33,6 +45,36 @@ type GithubRepo = {
   fork: boolean;
 };
 
+function calculateTotalExperience(experiences: ExperienceItem[]): string {
+  let totalMonths = 0;
+  for (const exp of experiences) {
+    if (!exp.startDate) continue;
+    const start = new Date(exp.startDate);
+    const end = exp.endDate ? new Date(exp.endDate) : new Date();
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) continue;
+
+    let yearsDiff = end.getFullYear() - start.getFullYear();
+    let monthsDiff = end.getMonth() - start.getMonth();
+    let daysDiff = end.getDate() - start.getDate();
+
+    if (daysDiff < 0) {
+      monthsDiff -= 1;
+    }
+    let expMonths = yearsDiff * 12 + monthsDiff;
+    if (expMonths < 0) expMonths = 0;
+    totalMonths += expMonths;
+  }
+
+  const years = Math.floor(totalMonths / 12);
+  const remainingMonths = totalMonths % 12;
+
+  const parts: string[] = [];
+  if (years > 0) parts.push(`${years} ${years === 1 ? "Year" : "Years"}`);
+  if (remainingMonths > 0 || years === 0) parts.push(`${remainingMonths} ${remainingMonths === 1 ? "Month" : "Months"}`);
+
+  return parts.join(", ");
+}
+
 export default function Home() {
   const [dark, setDark] = useState(true);
   const [mobile, setMobile] = useState(false);
@@ -43,6 +85,44 @@ export default function Home() {
   const [showTop, setShowTop] = useState(false);
   const [repos, setRepos] = useState<GithubRepo[]>([]);
   const [repoStatus, setRepoStatus] = useState<"loading" | "ready" | "error">("loading");
+
+  // Editable state
+  const [isEditor, setIsEditor] = useState(false);
+  const [profileData, setProfileData] = useState<any>(defaultProfile);
+  const [expList, setExpList] = useState<ExperienceItem[]>(defaultExperience);
+  const [skillsList, setSkillsList] = useState<string[]>([...defaultSkills]);
+
+  // Auth & Token Security states
+  const [authKeyInput, setAuthKeyInput] = useState("");
+  const [savedAuthKey, setSavedAuthKey] = useState("SureshAdmin123"); // Default fallback
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [githubToken, setGithubToken] = useState("");
+  const [showTokenModal, setShowTokenModal] = useState(false);
+
+  // GitHub Push State
+  const [pushStatus, setPushStatus] = useState<"idle" | "pushing" | "success" | "error">("idle");
+  const [pushMessage, setPushMessage] = useState("");
+
+  // Load saved local edits, token, and auth key
+  useEffect(() => {
+    try {
+      const savedProfile = localStorage.getItem("sg_edited_profile");
+      if (savedProfile) setProfileData(JSON.parse(savedProfile));
+
+      const savedExp = localStorage.getItem("sg_edited_experience");
+      if (savedExp) setExpList(JSON.parse(savedExp));
+
+      const savedToken = localStorage.getItem("sg_github_token");
+      if (savedToken) setGithubToken(savedToken);
+
+      const savedKey = localStorage.getItem("sg_auth_key");
+      if (savedKey) setSavedAuthKey(savedKey);
+    } catch {}
+  }, []);
+
+  const totalExperienceFormatted = useMemo(() => {
+    return calculateTotalExperience(expList);
+  }, [expList]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? "dark" : "light";
@@ -69,7 +149,7 @@ export default function Home() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`https://api.github.com/users/${profile.githubUsername}/repos?sort=updated&per_page=6`, {
+    fetch(`https://api.github.com/users/${profileData.githubUsername || defaultProfile.githubUsername}/repos?sort=updated&per_page=6`, {
       signal: controller.signal,
       headers: { Accept: "vnd.github+json" }
     })
@@ -83,12 +163,130 @@ export default function Home() {
       })
       .catch(() => setRepoStatus("error"));
     return () => controller.abort();
-  }, []);
+  }, [profileData.githubUsername]);
 
   const filtered = useMemo(() => {
-    if (filter === "All") return projects;
-    return projects.filter(p => p.category === filter);
+    if (filter === "All") return defaultProjects;
+    return defaultProjects.filter(p => p.category === filter);
   }, [filter]);
+
+  // Handle Edit Mode click
+  const handleEditModeToggle = () => {
+    if (isEditor) {
+      // If already open, just close it
+      setIsEditor(false);
+    } else {
+      // Prompt for authorization key before enabling edit mode
+      setShowAuthModal(true);
+    }
+  };
+
+  // Submit Authorization Key
+  const handleAuthSubmit = () => {
+    if (authKeyInput === savedAuthKey) {
+      setIsEditor(true);
+      setShowAuthModal(false);
+      setAuthKeyInput("");
+    } else {
+      alert("❌ Incorrect Authorization Key!");
+    }
+  };
+
+  // Save changes locally
+  const saveLocalChanges = () => {
+    try {
+      localStorage.setItem("sg_edited_profile", JSON.stringify(profileData));
+      localStorage.setItem("sg_edited_experience", JSON.stringify(expList));
+      alert("✅ Changes saved to your browser! Click 'Push to GitHub' to publish them live.");
+    } catch (e) {
+      alert("Error saving locally.");
+    }
+  };
+
+  // Add new experience
+  const handleAddExperience = () => {
+    const newExp: ExperienceItem = {
+      company: "NEW COMPANY NAME",
+      role: "Job Title / Role",
+      location: "Location",
+      dates: "Month Year – Present",
+      startDate: new Date().toISOString().split("T")[0],
+      endDate: null,
+      bullets: ["Enter key achievements and responsibilities here."]
+    };
+    setExpList([newExp, ...expList]);
+    setOpen(0);
+  };
+
+  // Push directly to GitHub via API
+  const pushToGitHub = async () => {
+    if (!githubToken) {
+      setShowTokenModal(true);
+      return;
+    }
+
+    setPushStatus("pushing");
+    setPushMessage("Connecting to GitHub API...");
+
+    try {
+      const repoOwner = "Chillbroz005";
+      const repoName = "portfolio";
+      const filePath = "src/data/profile.ts";
+
+      // 1. Get current file sha
+      const getRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
+        headers: {
+          Authorization: `Bearer ${githubToken}`,
+          Accept: "application/vnd.github.v3+json"
+        }
+      });
+
+      if (!getRes.ok) {
+        throw new Error(`Failed to fetch current file from GitHub (${getRes.status}). Check token permissions.`);
+      }
+
+      const fileData = await getRes.json();
+      const currentSha = fileData.sha;
+
+      // 2. Generate updated TS code (incorporates customized auth keys securely)
+      const updatedCode = `export const profile = ${JSON.stringify(profileData, null, 2)} as const;\n\nexport type ExperienceItem = {\n  company: string;\n  role: string;\n  location: string;\n  dates: string;\n  startDate: string;\n  endDate: string | null;\n  bullets: string[];\n};\n\nexport const experience: ExperienceItem[] = ${JSON.stringify(expList, null, 2)};\n\nexport const engagements = ${JSON.stringify(defaultEngagements, null, 2)};\n\nexport const skills = ${JSON.stringify(skillsList, null, 2)};\n\nexport const software = ${JSON.stringify(defaultSoftware, null, 2)};\n\nexport const tools = ${JSON.stringify(defaultTools, null, 2)};\n\nexport const education = ${JSON.stringify(defaultEducation, null, 2)};\n\nexport const certifications = ${JSON.stringify(defaultCertifications, null, 2)};\n\nexport const projects = ${JSON.stringify(defaultProjects, null, 2)};\n`;
+
+      // 3. Encode to base64
+      const utf8Bytes = new TextEncoder().encode(updatedCode);
+      let binaryStr = "";
+      for (let i = 0; i < utf8Bytes.length; i++) {
+        binaryStr += String.fromCharCode(utf8Bytes[i]);
+      }
+      const base64Content = btoa(binaryStr);
+
+      // 4. Commit to GitHub
+      const putRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${githubToken}`,
+          Accept: "application/vnd.github.v3+json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: "Update profile & experience data via Web Editor",
+          content: base64Content,
+          sha: currentSha,
+          branch: "main"
+        })
+      });
+
+      if (!putRes.ok) {
+        const errData = await putRes.json();
+        throw new Error(errData.message || "Push failed.");
+      }
+
+      setPushStatus("success");
+      setPushMessage("🎉 Successfully pushed directly to GitHub repository! Your GitHub Pages build has started and will update in 1-2 minutes.");
+    } catch (err: any) {
+      setPushStatus("error");
+      setPushMessage(`Push failed: ${err.message}`);
+    }
+  };
 
   return (
     <main id="top">
@@ -108,6 +306,21 @@ export default function Home() {
           <button onClick={() => setDark(!dark)} aria-label="Toggle dark and light mode">
             {dark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
+          <button
+            onClick={handleEditModeToggle}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              background: isEditor ? "var(--accent)" : "var(--panel)",
+              color: isEditor ? "#050b14" : "var(--accent)",
+              fontWeight: 800,
+              fontSize: "13px",
+              borderColor: "var(--accent)"
+            }}
+          >
+            {isEditor ? <Unlock size={15} /> : <Lock size={15} />} {isEditor ? "Exit Editor" : "Edit Mode"}
+          </button>
           <button className="recruiterBtn" onClick={() => setRecruiter(true)}>
             30-Second Profile
           </button>
@@ -117,17 +330,126 @@ export default function Home() {
         </div>
       </header>
 
-      {mobile && (
-        <div className="mobileNav" style={{
-          position: "fixed", top: "80px", left: 0, right: 0, zIndex: 49,
-          background: "var(--panel)", borderBottom: "1px solid var(--line)", padding: "1.5rem",
-          display: "flex", flexDirection: "column", gap: "1rem"
+      {/* Editor Control Bar */}
+      <AnimatePresence>
+        {isEditor && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            style={{
+              position: "sticky",
+              top: "80px",
+              zIndex: 45,
+              background: "linear-gradient(135deg, rgba(16, 28, 48, 0.95), rgba(5, 11, 20, 0.95))",
+              backdropFilter: "blur(20px)",
+              borderBottom: "1px solid var(--accent)",
+              padding: "12px 5vw",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "10px"
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ color: "var(--accent)", fontWeight: 800, fontSize: "14px" }}>
+                ⚙️ LIVE ADMIN & EDITOR MODE
+              </span>
+              <span style={{ color: "var(--muted)", fontSize: "12px" }}>
+                Edit fields and publish directly to GitHub!
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <button
+                onClick={handleAddExperience}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 14px",
+                  background: "rgba(0, 229, 255, 0.1)",
+                  border: "1px solid var(--accent)",
+                  borderRadius: "10px",
+                  color: "var(--accent)",
+                  fontSize: "13px",
+                  fontWeight: 700
+                }}
+              >
+                <Plus size={15} /> Add Experience
+              </button>
+              <button
+                onClick={saveLocalChanges}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 14px",
+                  background: "var(--panel)",
+                  border: "1px solid var(--line)",
+                  borderRadius: "10px",
+                  color: "var(--text)",
+                  fontSize: "13px",
+                  fontWeight: 700
+                }}
+              >
+                <Save size={15} /> Save Locally
+              </button>
+              <button
+                onClick={pushToGitHub}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 16px",
+                  background: "linear-gradient(135deg, var(--accent), var(--accent2))",
+                  border: 0,
+                  borderRadius: "10px",
+                  color: "#050b14",
+                  fontSize: "13px",
+                  fontWeight: 800
+                }}
+              >
+                <Sparkles size={15} /> Push to GitHub 🚀
+              </button>
+              <button
+                onClick={() => setShowTokenModal(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 12px",
+                  background: "var(--panel)",
+                  border: "1px solid var(--line)",
+                  borderRadius: "10px",
+                  color: "var(--muted)",
+                  fontSize: "13px"
+                }}
+              >
+                <Key size={14} /> Settings & Keys
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Push Status Banner */}
+      {pushStatus !== "idle" && (
+        <div style={{
+          padding: "16px 5vw",
+          background: pushStatus === "success" ? "rgba(16, 185, 129, 0.2)" : pushStatus === "error" ? "rgba(239, 68, 68, 0.2)" : "rgba(0, 229, 255, 0.2)",
+          borderBottom: "1px solid var(--line)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
         }}>
-          {nav.map(([id, label]) => (
-            <a key={id} href={`#${id}`} onClick={() => setMobile(false)} style={{ fontSize: "16px", fontWeight: 600 }}>
-              {label}
-            </a>
-          ))}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px" }}>
+            {pushStatus === "pushing" && <RefreshCw size={18} className="animate-spin" style={{ color: "var(--accent)" }} />}
+            {pushStatus === "success" && <CheckCircle size={18} style={{ color: "var(--emerald)" }} />}
+            {pushStatus === "error" && <AlertCircle size={18} style={{ color: "#ef4444" }} />}
+            <strong>{pushMessage}</strong>
+          </div>
+          <button onClick={() => setPushStatus("idle")}><X size={16} /></button>
         </div>
       )}
 
@@ -137,9 +459,33 @@ export default function Home() {
           <div className="bento-card hero-main">
             <div>
               <span className="eyebrow">SUPPLY CHAIN • PROCUREMENT • PROJECTS</span>
-              <h1 className="hero-title">{profile.name}</h1>
-              <h2 className="hero-subtitle">{profile.title}</h2>
-              <p className="hero-tagline">{profile.tagline}</p>
+
+              {isEditor ? (
+                <div style={{ marginTop: "1rem", display: "grid", gap: "10px" }}>
+                  <input
+                    style={{ fontSize: "32px", fontWeight: 900, background: "var(--bg)", border: "1px solid var(--accent)", color: "var(--text)", padding: "8px 12px", borderRadius: "8px" }}
+                    value={profileData.name}
+                    onChange={e => setProfileData({ ...profileData, name: e.target.value })}
+                  />
+                  <input
+                    style={{ fontSize: "18px", fontWeight: 700, background: "var(--bg)", border: "1px solid var(--line)", color: "var(--accent)", padding: "6px 12px", borderRadius: "8px" }}
+                    value={profileData.title}
+                    onChange={e => setProfileData({ ...profileData, title: e.target.value })}
+                  />
+                  <textarea
+                    style={{ fontSize: "14px", background: "var(--bg)", border: "1px solid var(--line)", color: "var(--muted)", padding: "8px 12px", borderRadius: "8px" }}
+                    rows={2}
+                    value={profileData.tagline}
+                    onChange={e => setProfileData({ ...profileData, tagline: e.target.value })}
+                  />
+                </div>
+              ) : (
+                <>
+                  <h1 className="hero-title">{profileData.name}</h1>
+                  <h2 className="hero-subtitle">{profileData.title}</h2>
+                  <p className="hero-tagline">{profileData.tagline}</p>
+                </>
+              )}
             </div>
             <div>
               <div className="hero-btns">
@@ -151,13 +497,13 @@ export default function Home() {
                 </a>
               </div>
               <div style={{ display: "flex", gap: "1.5rem", marginTop: "2rem", flexWrap: "wrap" }}>
-                <a href={profile.linkedin} target="_blank" rel="noreferrer" style={{ display: "flex", gap: "8px", alignItems: "center", color: "var(--muted)", fontSize: "13px", fontWeight: 600 }}>
+                <a href={profileData.linkedin} target="_blank" rel="noreferrer" style={{ display: "flex", gap: "8px", alignItems: "center", color: "var(--muted)", fontSize: "13px", fontWeight: 600 }}>
                   <Linkedin size={16} /> LinkedIn
                 </a>
-                <a href={profile.github} target="_blank" rel="noreferrer" style={{ display: "flex", gap: "8px", alignItems: "center", color: "var(--muted)", fontSize: "13px", fontWeight: 600 }}>
+                <a href={profileData.github} target="_blank" rel="noreferrer" style={{ display: "flex", gap: "8px", alignItems: "center", color: "var(--muted)", fontSize: "13px", fontWeight: 600 }}>
                   <Github size={16} /> GitHub
                 </a>
-                <a href={`mailto:${profile.email}`} style={{ display: "flex", gap: "8px", alignItems: "center", color: "var(--muted)", fontSize: "13px", fontWeight: 600 }}>
+                <a href={`mailto:${profileData.email}`} style={{ display: "flex", gap: "8px", alignItems: "center", color: "var(--muted)", fontSize: "13px", fontWeight: 600 }}>
                   <Mail size={16} /> Email
                 </a>
               </div>
@@ -166,17 +512,29 @@ export default function Home() {
 
           <div className="bento-card hero-sidebar">
             <img className="profile-photo" src={`${BASE}/profile-photo.png`} alt="Suresh Ganesan professional portrait" loading="eager" />
+
             <div className="profile-stat">
               <span>Location</span>
-              <strong>{profile.location}</strong>
+              {isEditor ? (
+                <input
+                  style={{ background: "var(--bg)", border: "1px solid var(--line)", color: "var(--text)", padding: "4px 8px", borderRadius: "6px", fontSize: "13px" }}
+                  value={profileData.location}
+                  onChange={e => setProfileData({ ...profileData, location: e.target.value })}
+                />
+              ) : (
+                <strong>{profileData.location}</strong>
+              )}
             </div>
-            <div className="profile-stat">
-              <span>Experience</span>
-              <strong>{profile.experienceYears}</strong>
+
+            {/* DYNAMIC EXPERIENCE IN YEARS & MONTHS (LESS GAPS) */}
+            <div className="profile-stat" style={{ background: "rgba(0, 229, 255, 0.05)", padding: "12px", borderRadius: "12px", margin: "6px 0", border: "1px solid rgba(0, 229, 255, 0.2)" }}>
+              <span style={{ color: "var(--accent)" }}>Total Experience</span>
+              <strong style={{ color: "var(--accent)", fontSize: "15px" }}>{totalExperienceFormatted}</strong>
             </div>
+
             <div className="profile-stat">
               <span>Global Reach</span>
-              <strong>6+ Countries</strong>
+              <strong>{profileData.regions?.length || 6}+ Countries</strong>
             </div>
           </div>
         </div>
@@ -207,9 +565,18 @@ export default function Home() {
         <div className="bento-grid-2">
           <div className="bento-card col-7">
             <span className="eyebrow">Professional Summary</span>
-            <p className="lead-text" style={{ marginTop: "1rem" }}>{profile.summary}</p>
+            {isEditor ? (
+              <textarea
+                style={{ width: "100%", marginTop: "1rem", background: "var(--bg)", border: "1px solid var(--line)", color: "var(--text)", padding: "12px", borderRadius: "10px", fontSize: "15px", lineHeight: 1.6 }}
+                rows={5}
+                value={profileData.summary}
+                onChange={e => setProfileData({ ...profileData, summary: e.target.value })}
+              />
+            ) : (
+              <p className="lead-text" style={{ marginTop: "1rem" }}>{profileData.summary}</p>
+            )}
             <div className="pill-cloud" style={{ marginTop: "1.5rem" }}>
-              {profile.regions.map(region => (
+              {profileData.regions?.map((region: string) => (
                 <span key={region}>🌍 {region}</span>
               ))}
             </div>
@@ -222,8 +589,8 @@ export default function Home() {
                 <strong>Manufacturing & SCM</strong>
               </div>
               <div className="mini-fact">
-                <span>Core Domain</span>
-                <strong>Strategic Sourcing & P2P</strong>
+                <span>Calculated Experience</span>
+                <strong style={{ color: "var(--accent)" }}>{totalExperienceFormatted}</strong>
               </div>
               <div className="mini-fact">
                 <span>Engineering</span>
@@ -241,24 +608,131 @@ export default function Home() {
       {/* Career Journey */}
       <Section id="journey" eyebrow="02 / CAREER JOURNEY" title="A procurement career built around projects, suppliers and delivery.">
         <div className="timeline-container">
-          {experience.map((e, i) => (
-            <motion.div className="timeline-card" key={e.company} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-              <button className="timeline-header" onClick={() => setOpen(open === i ? -1 : i)} aria-expanded={open === i}>
-                <div>
-                  <span className="date-badge">{e.dates}</span>
-                  <h3>{e.role}</h3>
-                  <p>{e.company} · {e.location}</p>
+          {expList.map((e, i) => (
+            <motion.div className="timeline-card" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+              <div className="timeline-header">
+                <div style={{ width: "100%" }}>
+                  {isEditor ? (
+                    <div style={{ display: "grid", gap: "8px", width: "100%", paddingRight: "1rem" }}>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>Start Date:</span>
+                        <input
+                          type="date"
+                          style={{ background: "var(--bg)", border: "1px solid var(--line)", color: "var(--accent)", padding: "4px 8px", borderRadius: "6px" }}
+                          value={e.startDate || ""}
+                          onChange={ev => {
+                            const updated = [...expList];
+                            updated[i].startDate = ev.target.value;
+                            setExpList(updated);
+                          }}
+                        />
+                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>End Date:</span>
+                        <input
+                          type="date"
+                          style={{ background: "var(--bg)", border: "1px solid var(--line)", color: "var(--accent)", padding: "4px 8px", borderRadius: "6px" }}
+                          value={e.endDate || ""}
+                          onChange={ev => {
+                            const updated = [...expList];
+                            updated[i].endDate = ev.target.value.trim() === "" ? null : ev.target.value;
+                            setExpList(updated);
+                          }}
+                        />
+                        <button
+                          style={{ fontSize: "11px", color: "var(--accent)", background: "rgba(0, 229, 255, 0.05)", border: "1px solid var(--line)", padding: "2px 8px", borderRadius: "4px" }}
+                          onClick={() => {
+                            const updated = [...expList];
+                            updated[i].endDate = null;
+                            setExpList(updated);
+                          }}
+                        >
+                          Set Present
+                        </button>
+                      </div>
+                      <input
+                        style={{ fontSize: "18px", fontWeight: 800, background: "var(--bg)", border: "1px solid var(--line)", color: "var(--text)", padding: "6px 10px", borderRadius: "8px" }}
+                        value={e.role}
+                        placeholder="Job Title"
+                        onChange={ev => {
+                          const updated = [...expList];
+                          updated[i].role = ev.target.value;
+                          setExpList(updated);
+                        }}
+                      />
+                      <div style={{ display: "flex", gap: "10px" }}>
+                        <input
+                          style={{ flex: 1, background: "var(--bg)", border: "1px solid var(--line)", color: "var(--muted)", padding: "4px 8px", borderRadius: "6px" }}
+                          value={e.company}
+                          placeholder="Company"
+                          onChange={ev => {
+                            const updated = [...expList];
+                            updated[i].company = ev.target.value;
+                            setExpList(updated);
+                          }}
+                        />
+                        <input
+                          style={{ flex: 1, background: "var(--bg)", border: "1px solid var(--line)", color: "var(--muted)", padding: "4px 8px", borderRadius: "6px" }}
+                          value={e.location}
+                          placeholder="Location"
+                          onChange={ev => {
+                            const updated = [...expList];
+                            updated[i].location = ev.target.value;
+                            setExpList(updated);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div onClick={() => setOpen(open === i ? -1 : i)} style={{ cursor: "pointer" }}>
+                      <span className="date-badge">{e.dates}</span>
+                      <h3>{e.role}</h3>
+                      <p>{e.company} · {e.location}</p>
+                    </div>
+                  )}
                 </div>
-                <ChevronDown size={20} style={{ transform: open === i ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
-              </button>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  {isEditor && (
+                    <button
+                      onClick={() => {
+                        if (confirm(`Remove ${e.company}?`)) {
+                          setExpList(expList.filter((_, idx) => idx !== i));
+                        }
+                      }}
+                      style={{ color: "#ef4444", padding: "8px", background: "rgba(239, 68, 68, 0.1)", borderRadius: "8px" }}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                  <button onClick={() => setOpen(open === i ? -1 : i)}>
+                    <ChevronDown size={20} style={{ transform: open === i ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </button>
+                </div>
+              </div>
+
               <AnimatePresence>
                 {open === i && (
                   <motion.div className="timeline-body" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-                    <ul>
-                      {e.bullets.map(b => (
-                        <li key={b}>{b}</li>
-                      ))}
-                    </ul>
+                    {isEditor ? (
+                      <div style={{ marginTop: "1rem", display: "grid", gap: "8px" }}>
+                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>Responsibilities (one per line):</span>
+                        <textarea
+                          style={{ width: "100%", background: "var(--bg)", border: "1px solid var(--line)", color: "var(--text)", padding: "10px", borderRadius: "8px", fontSize: "13px", lineHeight: 1.6 }}
+                          rows={6}
+                          value={e.bullets.join("\n")}
+                          onChange={ev => {
+                            const updated = [...expList];
+                            updated[i].bullets = ev.target.value.split("\n");
+                            setExpList(updated);
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <ul>
+                        {e.bullets.map((b, bIdx) => (
+                          <li key={bIdx}>{b}</li>
+                        ))}
+                      </ul>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -273,19 +747,31 @@ export default function Home() {
           <div className="bento-card col-12">
             <span className="eyebrow">Procurement & SCM Competencies</span>
             <div className="pill-cloud" style={{ marginTop: "1.25rem" }}>
-              {skills.map(s => <span key={s}>{s}</span>)}
+              {skillsList.map((s, idx) => (
+                <span key={idx}>
+                  {s}
+                  {isEditor && (
+                    <button
+                      onClick={() => setSkillsList(skillsList.filter((_, i) => i !== idx))}
+                      style={{ marginLeft: "6px", color: "#ef4444" }}
+                    >
+                      ×
+                    </button>
+                  )}
+                </span>
+              ))}
             </div>
           </div>
           <div className="bento-card col-6" style={{ gridColumn: "span 6" }}>
             <span className="eyebrow">Software Systems</span>
             <div className="pill-cloud" style={{ marginTop: "1.25rem" }}>
-              {software.map(s => <span key={s} style={{ background: "rgba(99, 102, 241, 0.05)" }}>💻 {s}</span>)}
+              {defaultSoftware.map(s => <span key={s} style={{ background: "rgba(99, 102, 241, 0.05)" }}>💻 {s}</span>)}
             </div>
           </div>
           <div className="bento-card col-6" style={{ gridColumn: "span 6" }}>
             <span className="eyebrow">Tools & Platforms</span>
             <div className="pill-cloud" style={{ marginTop: "1.25rem" }}>
-              {tools.map(t => <span key={t} style={{ background: "rgba(16, 185, 129, 0.05)" }}>🛠️ {t}</span>)}
+              {defaultTools.map(t => <span key={t} style={{ background: "rgba(16, 185, 129, 0.05)" }}>🛠️ {t}</span>)}
             </div>
           </div>
         </div>
@@ -294,7 +780,7 @@ export default function Home() {
       {/* Achievements */}
       <Section id="achievements" eyebrow="04 / ACHIEVEMENTS & RECOGNITION" title="Documented outcomes and industry recognition.">
         <div className="achievements-grid">
-          {profile.achievements.map((a, i) => (
+          {profileData.achievements?.map((a: string, i: number) => (
             <motion.div className="achievement-bento" key={a} whileHover={{ y: -5 }}>
               <span>0{i + 1} // AWARD</span>
               <p>{a}</p>
@@ -338,31 +824,20 @@ export default function Home() {
             </div>
           )}
         </div>
-
-        <div className="bento-card" style={{ marginTop: "2rem" }}>
-          <span className="eyebrow">KEY ENGAGEMENTS & MILESTONES</span>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", marginTop: "1.5rem" }}>
-            {engagements.map(x => (
-              <div key={x} style={{ padding: "1.25rem", background: "rgba(255,255,255,0.02)", border: "1px solid var(--line)", borderRadius: "14px", color: "var(--muted)", fontSize: "14px", fontWeight: 500 }}>
-                {x}
-              </div>
-            ))}
-          </div>
-        </div>
       </Section>
 
       {/* GitHub Section */}
       <Section id="github" eyebrow="06 / GITHUB ACTIVITY" title="Public repository activity and code contributions.">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
           <p style={{ color: "var(--muted)", maxWidth: "600px", margin: 0 }}>
-            Repositories are loaded live from GitHub's public API. Only publicly returned repository metadata is displayed.
+            Repositories are loaded live from GitHub's public API for user <strong>{profileData.githubUsername}</strong>.
           </p>
-          <a className="secondary-btn" href={profile.githubProfile} target="_blank" rel="noreferrer">
+          <a className="secondary-btn" href={profileData.githubProfile} target="_blank" rel="noreferrer">
             <Github size={16} /> Open GitHub Profile
           </a>
         </div>
         {repoStatus === "loading" && <div className="bento-card" style={{ textAlign: "center", color: "var(--muted)" }}>Loading public repositories…</div>}
-        {repoStatus === "error" && <div className="bento-card" style={{ textAlign: "center", color: "var(--muted)" }}>GitHub repository data could not be loaded right now. Your supplied GitHub link remains available above.</div>}
+        {repoStatus === "error" && <div className="bento-card" style={{ textAlign: "center", color: "var(--muted)" }}>GitHub repository data could not be loaded right now.</div>}
         {repoStatus === "ready" && (
           <div className="repo-grid">
             {repos.length ? repos.map(r => (
@@ -384,13 +859,13 @@ export default function Home() {
         )}
       </Section>
 
-      {/* Education & Certifications */}
+      {/* Education */}
       <Section id="education" eyebrow="07 / EDUCATION & CERTIFICATIONS" title="Engineering foundation and continuous professional training.">
         <div className="bento-grid-2">
           <div className="bento-card col-7">
             <span className="eyebrow">Academic Background</span>
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", marginTop: "1.5rem" }}>
-              {education.map(e => (
+              {defaultEducation.map(e => (
                 <div key={e.degree} style={{ paddingBottom: "1.25rem", borderBottom: "1px solid var(--line)" }}>
                   <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--accent)" }}>{e.year}</span>
                   <h3 style={{ fontSize: "18px", fontWeight: 800, margin: "4px 0" }}>{e.degree}</h3>
@@ -403,7 +878,7 @@ export default function Home() {
           <div className="bento-card col-5">
             <span className="eyebrow">Certifications</span>
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1.5rem" }}>
-              {certifications.map(c => (
+              {defaultCertifications.map(c => (
                 <div key={c} style={{ padding: "1.25rem", background: "rgba(255,255,255,0.02)", border: "1px solid var(--line)", borderRadius: "14px", fontWeight: 700 }}>
                   🏆 {c}
                 </div>
@@ -413,15 +888,15 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* Contact Section */}
+      {/* Contact */}
       <Section id="contact" eyebrow="08 / CONTACT" title="Let's connect around procurement, SCM and project delivery.">
         <div className="contact-grid">
           <div className="contact-info-list">
-            <a className="contact-item" href={`mailto:${profile.email}`}>
+            <a className="contact-item" href={`mailto:${profileData.email}`}>
               <Mail size={20} style={{ color: "var(--accent)" }} />
-              <span>{profile.email}</span>
+              <span>{profileData.email}</span>
             </a>
-            {profile.phones.map(p => (
+            {profileData.phones?.map((p: string) => (
               <a className="contact-item" href={`tel:${p.replace(/\s/g, "")}`} key={p}>
                 <Phone size={20} style={{ color: "var(--accent)" }} />
                 <span>{p}</span>
@@ -429,19 +904,19 @@ export default function Home() {
             ))}
             <div className="contact-item">
               <MapPin size={20} style={{ color: "var(--accent)" }} />
-              <span>{profile.location}</span>
+              <span>{profileData.location}</span>
             </div>
-            <a className="contact-item" href={profile.linkedin} target="_blank" rel="noreferrer">
+            <a className="contact-item" href={profileData.linkedin} target="_blank" rel="noreferrer">
               <Linkedin size={20} style={{ color: "var(--accent)" }} />
               <span>LinkedIn Profile</span>
             </a>
-            <a className="contact-item" href={profile.github} target="_blank" rel="noreferrer">
+            <a className="contact-item" href={profileData.github} target="_blank" rel="noreferrer">
               <Github size={20} style={{ color: "var(--accent)" }} />
               <span>GitHub Profile</span>
             </a>
           </div>
 
-          <form className="contact-form" action={`mailto:${profile.email}`} method="post" encType="text/plain">
+          <form className="contact-form" action={`mailto:${profileData.email}`} method="post" encType="text/plain">
             <label>
               Your Name
               <input name="name" required placeholder="Name" />
@@ -463,7 +938,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer>
-        <span>© {new Date().getFullYear()} {profile.name}. All rights reserved.</span>
+        <span>© {new Date().getFullYear()} {profileData.name}. All rights reserved.</span>
         <span>Supply Chain · Procurement · Projects</span>
       </footer>
 
@@ -477,6 +952,109 @@ export default function Home() {
         <Download size={16} /> Resume PDF
       </a>
 
+      {/* Admin Authorization Prompt Modal */}
+      <AnimatePresence>
+        {showAuthModal && (
+          <div className="modal-backdrop">
+            <motion.div className="recruiter-modal" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+              <button className="modal-close" onClick={() => setShowAuthModal(false)} aria-label="Close modal">
+                <X size={18} />
+              </button>
+              <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+                <Lock size={40} style={{ color: "var(--accent)", margin: "0 auto 10px" }} />
+                <h2 style={{ fontSize: "24px", fontWeight: 900 }}>Admin Passkey Required</h2>
+                <p style={{ color: "var(--muted)", fontSize: "14px" }}>Please enter your authorization phrase to enable editing.</p>
+              </div>
+              <div style={{ display: "grid", gap: "10px", marginBottom: "1.5rem" }}>
+                <input
+                  type="password"
+                  style={{ width: "100%", padding: "12px", background: "var(--bg)", border: "1px solid var(--accent)", borderRadius: "10px", color: "var(--text)" }}
+                  value={authKeyInput}
+                  placeholder="Enter access key..."
+                  onKeyDown={e => e.key === "Enter" && handleAuthSubmit()}
+                  onChange={e => setAuthKeyInput(e.target.value)}
+                />
+              </div>
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                <button className="secondary-btn" onClick={() => setShowAuthModal(false)}>Cancel</button>
+                <button className="primary-btn" onClick={handleAuthSubmit}>Unlock Editor</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Token & Security Settings Modal */}
+      <AnimatePresence>
+        {showTokenModal && (
+          <div className="modal-backdrop">
+            <motion.div className="recruiter-modal" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+              <button className="modal-close" onClick={() => setShowTokenModal(false)} aria-label="Close modal">
+                <X size={18} />
+              </button>
+              <span className="eyebrow">WEB ADMIN CONFIGURATION</span>
+              <h2 style={{ fontSize: "24px", fontWeight: 900, margin: "8px 0 12px 0" }}>Security Settings & Keys</h2>
+
+              {/* GitHub PAT Storage Description */}
+              <div style={{ padding: "12px", background: "rgba(0, 229, 255, 0.05)", borderRadius: "12px", border: "1px solid rgba(0, 229, 255, 0.2)", fontSize: "13px", lineHeight: 1.5, marginBottom: "1.5rem" }}>
+                💡 <strong>Persistent Token Security:</strong> You only need to paste your GitHub Access Token <strong>once</strong>. The browser saves it securely in your device's <code>localStorage</code>, so you don't have to copy-paste it every time you edit!
+              </div>
+
+              <div style={{ display: "grid", gap: "15px", marginBottom: "1.5rem" }}>
+                <label style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700, display: "grid", gap: "6px" }}>
+                  GitHub Personal Access Token:
+                  <input
+                    type="password"
+                    style={{ padding: "12px", background: "var(--bg)", border: "1px solid var(--line)", borderRadius: "10px", color: "var(--text)" }}
+                    value={githubToken}
+                    placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                    onChange={e => setGithubToken(e.target.value)}
+                  />
+                </label>
+
+                <label style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700, display: "grid", gap: "6px" }}>
+                  Customize Admin Passkey (Auth Key):
+                  <input
+                    type="text"
+                    style={{ padding: "12px", background: "var(--bg)", border: "1px solid var(--line)", borderRadius: "10px", color: "var(--text)" }}
+                    value={savedAuthKey}
+                    placeholder="SureshAdmin123"
+                    onChange={e => setSavedAuthKey(e.target.value)}
+                  />
+                </label>
+              </div>
+
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                <button
+                  className="secondary-btn"
+                  onClick={() => {
+                    localStorage.removeItem("sg_github_token");
+                    localStorage.removeItem("sg_auth_key");
+                    setGithubToken("");
+                    setSavedAuthKey("SureshAdmin123");
+                    setShowTokenModal(false);
+                    alert("Settings cleared.");
+                  }}
+                >
+                  Reset Defaults
+                </button>
+                <button
+                  className="primary-btn"
+                  onClick={() => {
+                    localStorage.setItem("sg_github_token", githubToken);
+                    localStorage.setItem("sg_auth_key", savedAuthKey);
+                    setShowTokenModal(false);
+                    alert("Settings saved successfully to browser local storage!");
+                  }}
+                >
+                  Save Settings
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Recruiter Modal */}
       <AnimatePresence>
         {recruiter && (
@@ -486,21 +1064,21 @@ export default function Home() {
                 <X size={18} />
               </button>
               <span className="eyebrow">30-SECOND RECRUITER PROFILE</span>
-              <h2 style={{ fontSize: "28px", fontWeight: 900, margin: "8px 0 4px 0" }}>{profile.name}</h2>
-              <p style={{ color: "var(--muted)", fontSize: "16px", marginBottom: "2rem" }}>{profile.title}</p>
+              <h2 style={{ fontSize: "28px", fontWeight: 900, margin: "8px 0 4px 0" }}>{profileData.name}</h2>
+              <p style={{ color: "var(--muted)", fontSize: "16px", marginBottom: "2rem" }}>{profileData.title}</p>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
                 <div className="mini-fact">
-                  <span>Experience</span>
-                  <strong>{profile.experienceYears}</strong>
+                  <span>Calculated Experience</span>
+                  <strong style={{ color: "var(--accent)" }}>{totalExperienceFormatted}</strong>
                 </div>
                 <div className="mini-fact">
                   <span>Latest Role</span>
-                  <strong>{experience[0].company}</strong>
+                  <strong>{expList[0]?.company || ""}</strong>
                 </div>
                 <div className="mini-fact" style={{ gridColumn: "span 2" }}>
                   <span>Global Coverage</span>
-                  <strong>{profile.regions.join(" · ")}</strong>
+                  <strong>{profileData.regions?.join(" · ")}</strong>
                 </div>
               </div>
 
@@ -508,10 +1086,10 @@ export default function Home() {
                 <a className="primary-btn" href={`${BASE}/resume.pdf`} download>
                   <Download size={16} /> Download Resume
                 </a>
-                <a className="secondary-btn" href={profile.linkedin} target="_blank" rel="noreferrer">
+                <a className="secondary-btn" href={profileData.linkedin} target="_blank" rel="noreferrer">
                   <Linkedin size={16} /> LinkedIn
                 </a>
-                <a className="secondary-btn" href={`mailto:${profile.email}`}>
+                <a className="secondary-btn" href={`mailto:${profileData.email}`}>
                   <Mail size={16} /> Email
                 </a>
               </div>

@@ -22,12 +22,24 @@ export const profile = {
   ]
 } as const;
 
-export const experience = [
+export type ExperienceItem = {
+  company: string;
+  role: string;
+  location: string;
+  dates: string;
+  startDate: string; // YYYY-MM-DD
+  endDate: string | null; // null for Present
+  bullets: string[];
+};
+
+export const experience: ExperienceItem[] = [
   {
     company: "ATMARTH TEKNIK SOLUTIONS PRIVATE LIMITED",
     role: "Senior Procurement Executive (supporting client AirTrunk as Senior Procurement Manager)",
     location: "Chennai, Tamil Nadu, India",
     dates: "August 2026 – Present",
+    startDate: "2026-08-01",
+    endDate: null,
     bullets: [
       "Led RFI activities on the Felix platform, including vendor stakeholder meetings, RFI preparation and dispatch, and vendor onboarding.",
       "Managed vendor communication and documentation, and issued RFQs on Felix.",
@@ -43,6 +55,8 @@ export const experience = [
     role: "Procurement Engineer – Fabrication & Project Division",
     location: "Singapore",
     dates: "May 2025 – May 2026",
+    startDate: "2025-05-15",
+    endDate: "2026-05-15",
     bullets: [
       "Managed end-to-end procurement for fabrication projects including PR creation, PO conversion and material availability against drawings and BOM.",
       "Evaluated, onboarded and developed vendors using quality, cost, delivery performance and technical capability.",
@@ -60,6 +74,8 @@ export const experience = [
     role: "Assistant Manager – Purchase and Projects",
     location: "Chennai, Tamil Nadu, India",
     dates: "June 2017 – May 2025",
+    startDate: "2017-06-01",
+    endDate: "2025-05-14",
     bullets: [
       "Developed strategic sourcing plans to optimize costs and supplier relationships.",
       "Managed procure-to-pay activities for CAPEX, OPEX and MEP requirements.",
