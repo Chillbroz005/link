@@ -1,21 +1,47 @@
 export const profile = {
-  name: "Suresh Ganesan",
-  title: "Senior Supply Chain / Procurement Professional",
-  summary:
-    "Procurement and Supply Chain professional with 9 years of experience across manufacturing, fabrication projects, and international procurement. Experienced in strategic sourcing, technical and commercial procurement, CAPEX/OPEX, P2P, contract management, vendor development, and project procurement.",
-  tagline: "Strategic sourcing, technical & commercial procurement, CAPEX/OPEX, P2P, contracts and international SCM, Functional consultant",
-  location: "Chennai, Tamil Nadu, India",
-  email: "mailmesuresh005@gmail.com",
-  phones: ["+91 9787932244", "+65 80923216"],
-  linkedin: "https://www.linkedin.com/in/suresh005/",
-  github: "https://github.com/Chillbroz005/",
-  githubProfile: "https://github.com/Chillbroz005",
-  githubUsername: "Chillbroz005",
-  experienceYears: "9 years",
-  regions: ["Hong Kong", "Japan", "Singapore", "Australia", "Saudi Arabia", "Malaysia"],
-  industries: ["Manufacturing", "Textiles", "Fabrication", "Marine", "Lifting gears"],
-  functions: ["Strategic sourcing", "Procurement", "P2P", "CAPEX/OPEX", "Contracts", "Vendor management", "IT procurement", "Tender evaluation", "Contracts (WO / SO / MSA)", "Know Your Supplier (KYS)"],
-  achievements: [
+  "name": "Suresh Ganesan",
+  "title": "Senior Supply Chain / Procurement Professional",
+  "summary": "Procurement and Supply Chain professional with 9 years of experience across manufacturing, fabrication projects, and international procurement. Experienced in strategic sourcing, technical and commercial procurement, CAPEX/OPEX, P2P, contract management, vendor development, and project procurement.",
+  "tagline": "Strategic sourcing, technical & commercial procurement, CAPEX/OPEX, P2P, contracts and international SCM, Functional consultant",
+  "location": "Chennai, Tamil Nadu, India",
+  "email": "mailmesuresh005@gmail.com",
+  "phones": [
+    "+91 9787932244",
+    "+65 80923216"
+  ],
+  "linkedin": "https://www.linkedin.com/in/suresh005/",
+  "github": "https://github.com/Chillbroz005/",
+  "githubProfile": "https://github.com/Chillbroz005",
+  "githubUsername": "Chillbroz005",
+  "experienceYears": "9 years",
+  "regions": [
+    "Hong Kong",
+    "Japan",
+    "Singapore",
+    "Australia",
+    "Saudi Arabia",
+    "Malaysia"
+  ],
+  "industries": [
+    "Manufacturing",
+    "Textiles",
+    "Fabrication",
+    "Marine",
+    "Lifting gears"
+  ],
+  "functions": [
+    "Strategic sourcing",
+    "Procurement",
+    "P2P",
+    "CAPEX/OPEX",
+    "Contracts",
+    "Vendor management",
+    "IT procurement",
+    "Tender evaluation",
+    "Contracts (WO / SO / MSA)",
+    "Know Your Supplier (KYS)"
+  ],
+  "achievements": [
     "Best Employee of the Year — 2019 & 2021",
     "Gold Award — QCFI Kaizen Mela, Madurai chapter, 2018",
     "Presented 35+ Kaizens in Loyal Group Kaizen competition"
@@ -27,20 +53,20 @@ export type ExperienceItem = {
   role: string;
   location: string;
   dates: string;
-  startDate: string; // YYYY-MM-DD
-  endDate: string | null; // null for Present
+  startDate: string;
+  endDate: string | null;
   bullets: string[];
 };
 
 export const experience: ExperienceItem[] = [
   {
-    company: "ATMARTH TEKNIK SOLUTIONS PRIVATE LIMITED",
-    role: "Senior Procurement Executive (supporting client AirTrunk as Senior Procurement Manager)",
-    location: "Chennai, Tamil Nadu, India",
-    dates: "August 2026 – Present",
-    startDate: "2026-08-01",
-    endDate: null,
-    bullets: [
+    "company": "ATMARTH TEKNIK SOLUTIONS PRIVATE LIMITED",
+    "role": "Senior Procurement Executive (supporting client AirTrunk as Senior Procurement Manager)",
+    "location": "Chennai, Tamil Nadu, India",
+    "dates": "August 2026 – Present",
+    "startDate": "2026-08-01",
+    "endDate": null,
+    "bullets": [
       "Led RFI activities on the Felix platform, including vendor stakeholder meetings, RFI preparation and dispatch, and vendor onboarding.",
       "Managed vendor communication and documentation, and issued RFQs on Felix.",
       "Conducted tender comparison and bid evaluation to shortlist vendors.",
@@ -51,13 +77,13 @@ export const experience: ExperienceItem[] = [
     ]
   },
   {
-    company: "FRANKLIN OFFSHORE INTERNATIONAL PTE LTD",
-    role: "Procurement Engineer – Fabrication & Project Division",
-    location: "Singapore",
-    dates: "May 2025 – May 2026",
-    startDate: "2025-05-15",
-    endDate: "2026-05-15",
-    bullets: [
+    "company": "FRANKLIN OFFSHORE INTERNATIONAL PTE LTD",
+    "role": "Procurement Engineer – Fabrication & Project Division",
+    "location": "Singapore",
+    "dates": "May 2025 – May 2026",
+    "startDate": "2025-05-15",
+    "endDate": "2026-05-15",
+    "bullets": [
       "Managed end-to-end procurement for fabrication projects including PR creation, PO conversion and material availability against drawings and BOM.",
       "Evaluated, onboarded and developed vendors using quality, cost, delivery performance and technical capability.",
       "Negotiated pricing, contracts and payment terms against budget targets.",
@@ -70,13 +96,13 @@ export const experience: ExperienceItem[] = [
     ]
   },
   {
-    company: "LOYAL TEXTILES MILLS LIMITED",
-    role: "Assistant Manager – Purchase and Projects",
-    location: "Chennai, Tamil Nadu, India",
-    dates: "June 2017 – May 2025",
-    startDate: "2017-06-01",
-    endDate: "2025-05-14",
-    bullets: [
+    "company": "LOYAL TEXTILES MILLS LIMITED",
+    "role": "Assistant Manager – Purchase and Projects",
+    "location": "Chennai, Tamil Nadu, India",
+    "dates": "June 2017 – May 2025",
+    "startDate": "2017-06-01",
+    "endDate": "2025-05-14",
+    "bullets": [
       "Developed strategic sourcing plans to optimize costs and supplier relationships.",
       "Managed procure-to-pay activities for CAPEX, OPEX and MEP requirements.",
       "Managed contract lifecycle and work orders including BOQs, rate analyses and contract drafting for manpower, O&M and service contracts.",
@@ -101,60 +127,130 @@ export const engagements = [
 ];
 
 export const skills = [
-  "Supply Chain", "Strategic Sourcing", "Technical Procurement", "Commercial Procurement",
-  "CAPEX / OPEX", "Procure-to-Pay (P2P)", "Global Sourcing", "Vendor Management",
-  "Contract Management", "RFQ / RFP", "Inventory Management / Optimization", "MRP",
-  "Civil Contracts & Purchases", "O&M & Manpower Contracts", "IT Material & Software Licensing",
-  "MEP / Projects", "MIS Reporting", "Tender Evaluation", "KYS / Vendor Compliance",
-  "ISO / QMS / EMS / OHSAS", "5S / Kaizen"
+  "Supply Chain",
+  "Strategic Sourcing",
+  "Technical Procurement",
+  "Commercial Procurement",
+  "CAPEX / OPEX",
+  "Procure-to-Pay (P2P)",
+  "Global Sourcing",
+  "Vendor Management",
+  "Contract Management",
+  "RFQ / RFP",
+  "Inventory Management / Optimization",
+  "MRP",
+  "Civil Contracts & Purchases",
+  "O&M & Manpower Contracts",
+  "IT Material & Software Licensing",
+  "MEP / Projects",
+  "MIS Reporting",
+  "Tender Evaluation",
+  "KYS / Vendor Compliance",
+  "ISO / QMS / EMS / OHSAS",
+  "5S / Kaizen"
 ];
 
-export const software = ["NOW ERP 6.0", "MS Office", "AutoCAD", "Oracle DBMS", "SAP HANA", "SolidWorks", "Power BI", "Oracle EPB"];
+export const software = [
+  "NOW ERP 6.0",
+  "MS Office",
+  "AutoCAD",
+  "Oracle DBMS",
+  "SAP HANA",
+  "SolidWorks",
+  "Power BI",
+  "Oracle EPB"
+];
 
-export const tools = ["Jira", "NetGain", "NetSuite", "Compliance Catalyst", "Felix", "Excel Query"];
+export const tools = [
+  "Jira",
+  "NetGain",
+  "NetSuite",
+  "Compliance Catalyst",
+  "Felix",
+  "Excel Query"
+];
 
 export const education = [
-  { degree: "B.E., Mechanical Engineering", institution: "Agni College of Technology, Chennai", year: "2017", detail: "8 CGPA" },
-  { degree: "Higher Secondary Certificate", institution: "Government Higher Secondary School, Tanjore", year: "2013", detail: "86%" },
-  { degree: "Secondary School Leaving Certificate", institution: "Government Higher Secondary School, Tanjore", year: "2011", detail: "93%" }
+  {
+    "degree": "B.E., Mechanical Engineering",
+    "institution": "Agni College of Technology, Chennai",
+    "year": "2017",
+    "detail": "8 CGPA"
+  },
+  {
+    "degree": "Higher Secondary Certificate",
+    "institution": "Government Higher Secondary School, Tanjore",
+    "year": "2013",
+    "detail": "86%"
+  },
+  {
+    "degree": "Secondary School Leaving Certificate",
+    "institution": "Government Higher Secondary School, Tanjore",
+    "year": "2011",
+    "detail": "93%"
+  }
 ];
 
-export const certifications = ["Lean Six Sigma – Green Belt", "NDT", "PLC & SCADA"];
+export const certifications = [
+  "Lean Six Sigma – Green Belt",
+  "NDT",
+  "PLC & SCADA"
+];
 
 export const projects = [
   {
-    title: "Modernization & Expansion Project",
-    category: "Procurement",
-    description: "Procurement and project engagement documented in the resume.",
-    technologies: [],
-    github: ""
+    "title": "Modernization & Expansion Project",
+    "category": "Procurement",
+    "description": "Procurement and project engagement documented in the resume.",
+    "technologies": [],
+    "github": ""
   },
   {
-    title: "Fabrication & Project Procurement",
-    category: "Procurement",
-    description: "End-to-end procurement for fabrication projects, including PR-to-PO flow, vendor development, material coordination and documentation.",
-    technologies: ["P2P", "RFQ/RFP", "Vendor management"],
-    github: ""
+    "title": "Fabrication & Project Procurement",
+    "category": "Procurement",
+    "description": "End-to-end procurement for fabrication projects, including PR-to-PO flow, vendor development, material coordination and documentation.",
+    "technologies": [
+      "P2P",
+      "RFQ/RFP",
+      "Vendor management"
+    ],
+    "github": ""
   },
   {
-    title: "Notification Logger",
-    category: "Android",
-    description: "An Android app built in Kotlin that captures and logs all device notifications in real time. Runs as a background service and stores notification data locally — useful for auditing, monitoring and automation use cases across any installed app.",
-    technologies: ["Kotlin", "Android", "Notifications API", "Background Service"],
-    github: "https://github.com/Chillbroz005/Notification_Logger"
+    "title": "Notification Logger",
+    "category": "Android",
+    "description": "An Android app built in Kotlin that captures and logs all device notifications in real time. Runs as a background service and stores notification data locally — useful for auditing, monitoring and automation use cases across any installed app.",
+    "technologies": [
+      "Kotlin",
+      "Android",
+      "Notifications API",
+      "Background Service"
+    ],
+    "github": "https://github.com/Chillbroz005/Notification_Logger"
   },
   {
-    title: "Group Guardian & Filter Bot",
-    category: "Automation",
-    description: "A Telegram bot that automates group chat moderation — filters spam and unwanted messages, manages member actions, and enforces rules without any manual intervention. Commercially deployed for real customer groups.",
-    technologies: ["Python", "Telegram Bot API", "Flask", "Automation"],
-    github: "https://github.com/Chillbroz005/Telegram-bot"
+    "title": "Group Guardian & Filter Bot",
+    "category": "Automation",
+    "description": "A Telegram bot that automates group chat moderation — filters spam and unwanted messages, manages member actions, and enforces rules without any manual intervention. Commercially deployed for real customer groups.",
+    "technologies": [
+      "Python",
+      "Telegram Bot API",
+      "Flask",
+      "Automation"
+    ],
+    "github": "https://github.com/Chillbroz005/Telegram-bot"
   },
   {
-    title: "Personal Portfolio Website",
-    category: "Other",
-    description: "This portfolio — built from scratch using TypeScript and deployed via GitHub Pages. Dynamically loads GitHub repositories via the public API, features filterable project cards, an interactive career timeline, and a contact form. Demonstrates full front-end development capability alongside a professional procurement profile.",
-    technologies: ["TypeScript", "GitHub Pages", "GitHub API", "HTML", "CSS"],
-    github: "https://github.com/Chillbroz005/portfolio"
+    "title": "Personal Portfolio Website",
+    "category": "Other",
+    "description": "This portfolio — built from scratch using TypeScript and deployed via GitHub Pages. Dynamically loads GitHub repositories via the public API, features filterable project cards, an interactive career timeline, and a contact form. Demonstrates full front-end development capability alongside a professional procurement profile.",
+    "technologies": [
+      "TypeScript",
+      "GitHub Pages",
+      "GitHub API",
+      "HTML",
+      "CSS"
+    ],
+    "github": "https://github.com/Chillbroz005/portfolio"
   }
 ];
