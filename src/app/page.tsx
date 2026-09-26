@@ -45,7 +45,30 @@ type GithubRepo = {
   fork: boolean;
 };
 
-// Always returns Years AND Months (e.g. "9 Years, 1 Month" or "9 Years, 0 Months")
+// Calculates exact duration in Years and Months (for total or per-role)
+function calculateDuration(startDateStr: string, endDateStr: string | null): string {
+  if (!startDateStr) return "";
+  const start = new Date(startDateStr);
+  const end = endDateStr ? new Date(endDateStr) : new Date();
+
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) return "";
+
+  let yearsDiff = end.getFullYear() - start.getFullYear();
+  let monthsDiff = end.getMonth() - start.getMonth();
+  let daysDiff = end.getDate() - start.getDate();
+
+  if (daysDiff < 0) {
+    monthsDiff -= 1;
+  }
+  let totalMonths = yearsDiff * 12 + monthsDiff;
+  if (totalMonths < 0) totalMonths = 0;
+
+  const years = Math.floor(totalMonths / 12);
+  const months = totalMonths % 12;
+
+  return `${years} ${years === 1 ? "Year" : "Years"}, ${months} ${months === 1 ? "Month" : "Months"}`;
+}
+
 function calculateTotalExperience(experiences: ExperienceItem[]): string {
   let totalMonths = 0;
   for (const exp of experiences) {
@@ -247,7 +270,7 @@ export default function Home() {
       const currentSha = fileData.sha;
 
       // 2. Generate updated TS code
-      const updatedCode = `export const profile = ${JSON.stringify(profileData, null, 2)} as const;\n\nexport type ExperienceItem = {\n  company: string;\n  role: string;\n  location: string;\n  dates: string;\n  startDate: string;\n  endDate: string | null;\n  bullets: string[];\n};\n\nexport const experience: ExperienceItem[] = ${JSON.stringify(expList, null, 2)};\n\nexport const engagements = ${JSON.stringify(defaultEngagements, null, 2)};\n\nexport const skills = ${JSON.stringify(skillsList, null, 2)};\n\nexport const software = ${JSON.stringify(defaultSoftware, null, 2)};\n\nexport const tools = ${JSON.stringify(defaultTools, null, 2)};\n\nexport const education = ${JSON.stringify(defaultEducation, null, 2)};\n\nexport const certifications = ${JSON.stringify(defaultCertifications, null, 2)};\n\nexport const projects = ${JSON.stringify(defaultProjects, null, 2)};\n`;
+      const updatedCode = `export const profile = ${JSON.stringify(profileData, null, 2)} as const;\n\nexport type ExperienceItem = {\n  company: string;\n  role: string;\n  location: string;\n  dates: string;\n  startDate: string;\n  endDate: string | null;\n  bullets: string[];\n};\n\nexport const experience: ExperienceItem[] = ${JSON.stringify(expList, null, 2)};\n\nexport const engagements = ${JSON.stringify(defaultEngagements, null, 2)};\n\nexport const skills = ${JSON.stringify(defaultSkills, null, 2)};\n\nexport const software = ${JSON.stringify(defaultSoftware, null, 2)};\n\nexport const tools = ${JSON.stringify(defaultTools, null, 2)};\n\nexport const education = ${JSON.stringify(defaultEducation, null, 2)};\n\nexport const certifications = ${JSON.stringify(defaultCertifications, null, 2)};\n\nexport const projects = ${JSON.stringify(defaultProjects, null, 2)};\n`;
 
       // 3. Encode to base64
       const utf8Bytes = new TextEncoder().encode(updatedCode);
@@ -681,7 +704,7 @@ export default function Home() {
                     </div>
                   ) : (
                     <div onClick={() => setOpen(open === i ? -1 : i)} style={{ cursor: "pointer" }}>
-                      <span className="date-badge">{e.dates}</span>
+                      <span className="date-badge">{e.dates} ({calculateDuration(e.startDate, e.endDate)})</span>
                       <h3>{e.role}</h3>
                       <p>{e.company} · {e.location}</p>
                     </div>
@@ -1057,7 +1080,7 @@ export default function Home() {
       <AnimatePresence>
         {recruiter && (
           <div className="modal-backdrop">
-            <motion.div className="recruiter-modal" initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}>
+            <motion.div className="recruiter-modal" initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}>
               <button className="modal-close" onClick={() => setRecruiter(false)} aria-label="Close modal">
                 <X size={18} />
               </button>
