@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowUpRight, ChevronDown, Download, ExternalLink, Github,
   Linkedin, Mail, MapPin, Menu, Moon, Phone, Send, Sun, X,
-  Edit3, Save, Plus, Trash2, Key, CheckCircle, AlertCircle, RefreshCw, Sparkles, Lock, Unlock, Palette
+  Edit3, Save, Plus, Trash2, Key, CheckCircle, AlertCircle, RefreshCw, Sparkles, Lock, Unlock
 } from "lucide-react";
 import {
   profile as defaultProfile,
@@ -33,7 +33,6 @@ const nav = [
 ];
 
 const projectFilters = ["All", "Procurement", "Automation", "Android", "Other"];
-const themes = ["obsidian", "emerald", "amber", "violet", "polar"];
 
 type GithubRepo = {
   id: number;
@@ -101,7 +100,6 @@ function calculateTotalExperience(experiences: ExperienceItem[]): string {
 
 export default function Home() {
   const [dark, setDark] = useState(true);
-  const [theme, setTheme] = useState("obsidian");
   const [mobile, setMobile] = useState(false);
   const [recruiter, setRecruiter] = useState(false);
   const [filter, setFilter] = useState("All");
@@ -116,7 +114,6 @@ export default function Home() {
   const [profileData, setProfileData] = useState<any>(defaultProfile);
   const [expList, setExpList] = useState<ExperienceItem[]>(defaultExperience);
   const [skillsList, setSkillsList] = useState<string[]>([...defaultSkills]);
-  const [customSections, setCustomSections] = useState<any[]>([]);
 
   // Auth & Token Security states
   const [authKeyInput, setAuthKeyInput] = useState("");
@@ -143,12 +140,6 @@ export default function Home() {
 
       const savedKey = localStorage.getItem("sg_auth_key");
       if (savedKey) setSavedAuthKey(savedKey);
-
-      const savedTheme = localStorage.getItem("sg_theme");
-      if (savedTheme) setTheme(savedTheme);
-
-      const savedSections = localStorage.getItem("sg_custom_sections");
-      if (savedSections) setCustomSections(JSON.parse(savedSections));
     } catch {}
   }, []);
 
@@ -158,19 +149,13 @@ export default function Home() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? "dark" : "light";
-    document.documentElement.dataset.themeStyle = theme;
-    try {
-      localStorage.setItem("suresh-theme", dark ? "dark" : "light");
-      localStorage.setItem("sg_theme", theme);
-    } catch {}
-  }, [dark, theme]);
+    try { localStorage.setItem("suresh-theme", dark ? "dark" : "light"); } catch {}
+  }, [dark]);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem("suresh-theme");
       if (saved) setDark(saved !== "light");
-      const savedTheme = localStorage.getItem("sg_theme");
-      if (savedTheme) setTheme(savedTheme);
     } catch {}
   }, []);
 
@@ -233,7 +218,6 @@ export default function Home() {
     try {
       localStorage.setItem("sg_edited_profile", JSON.stringify(profileData));
       localStorage.setItem("sg_edited_experience", JSON.stringify(expList));
-      localStorage.setItem("sg_custom_sections", JSON.stringify(customSections));
       alert("✅ Changes saved to your browser! Click 'Push to GitHub' to publish them live.");
     } catch (e) {
       alert("Error saving locally.");
@@ -255,17 +239,6 @@ export default function Home() {
     setOpen(0);
   };
 
-  // Add custom section
-  const handleAddSection = () => {
-    const newSection = {
-      id: "custom-" + Date.now(),
-      title: "New Custom Section",
-      subtitle: "Add your custom content here",
-      content: "This section is entirely editable through the editor."
-    };
-    setCustomSections([...customSections, newSection]);
-  };
-
   // Push directly to GitHub via API
   const pushToGitHub = async () => {
     if (!githubToken) {
@@ -281,6 +254,7 @@ export default function Home() {
       const repoName = "portfolio";
       const filePath = "src/data/profile.ts";
 
+      // 1. Get current file sha
       const getRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
         headers: {
           Authorization: `Bearer ${githubToken}`,
@@ -295,8 +269,10 @@ export default function Home() {
       const fileData = await getRes.json();
       const currentSha = fileData.sha;
 
+      // 2. Generate updated TS code
       const updatedCode = `export const profile = ${JSON.stringify(profileData, null, 2)} as const;\n\nexport type ExperienceItem = {\n  company: string;\n  role: string;\n  location: string;\n  dates: string;\n  startDate: string;\n  endDate: string | null;\n  bullets: string[];\n};\n\nexport const experience: ExperienceItem[] = ${JSON.stringify(expList, null, 2)};\n\nexport const engagements = ${JSON.stringify(defaultEngagements, null, 2)};\n\nexport const skills = ${JSON.stringify(skillsList, null, 2)};\n\nexport const software = ${JSON.stringify(defaultSoftware, null, 2)};\n\nexport const tools = ${JSON.stringify(defaultTools, null, 2)};\n\nexport const education = ${JSON.stringify(defaultEducation, null, 2)};\n\nexport const certifications = ${JSON.stringify(defaultCertifications, null, 2)};\n\nexport const projects = ${JSON.stringify(defaultProjects, null, 2)};\n`;
 
+      // 3. Encode to base64
       const utf8Bytes = new TextEncoder().encode(updatedCode);
       let binaryStr = "";
       for (let i = 0; i < utf8Bytes.length; i++) {
@@ -304,6 +280,7 @@ export default function Home() {
       }
       const base64Content = btoa(binaryStr);
 
+      // 4. Commit to GitHub
       const putRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
         method: "PUT",
         headers: {
@@ -325,7 +302,7 @@ export default function Home() {
       }
 
       setPushStatus("success");
-      setPushMessage("🎉 Successfully pushed directly to GitHub repository!");
+      setPushMessage("🎉 Successfully pushed directly to GitHub repository! Your GitHub Pages build has started and will update in 1-2 minutes.");
     } catch (err: any) {
       setPushStatus("error");
       setPushMessage(`Push failed: ${err.message}`);
@@ -347,20 +324,29 @@ export default function Home() {
           ))}
         </nav>
         <div className="navActions">
-          <select value={theme} onChange={(e) => setTheme(e.target.value)}>
-            {themes.map(t => <option key={t} value={t}>{t.toUpperCase()}</option>)}
-          </select>
           <button onClick={() => setDark(!dark)} aria-label="Toggle dark and light mode">
             {dark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
           <button
             onClick={handleEditModeToggle}
-            style={{ display: "flex", alignItems: "center", gap: "6px", background: isEditor ? "var(--accent)" : "var(--panel)", color: isEditor ? "#050b14" : "var(--accent)", fontWeight: 800, fontSize: "13px", borderColor: "var(--accent)" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              background: isEditor ? "var(--accent)" : "var(--panel)",
+              color: isEditor ? "#050b14" : "var(--accent)",
+              fontWeight: 800,
+              fontSize: "13px",
+              borderColor: "var(--accent)"
+            }}
           >
             {isEditor ? <Unlock size={15} /> : <Lock size={15} />} {isEditor ? "Exit Editor" : "Edit Mode"}
           </button>
           <button className="recruiterBtn" onClick={() => setRecruiter(true)}>
             30-Second Profile
+          </button>
+          <button className="mobileOnly" onClick={() => setMobile(!mobile)} aria-label="Open mobile navigation">
+            {mobile ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </header>
@@ -374,7 +360,7 @@ export default function Home() {
             exit={{ opacity: 0, y: -20 }}
             style={{
               position: "sticky",
-              top: "72px",
+              top: "80px",
               zIndex: 45,
               background: "linear-gradient(135deg, rgba(16, 28, 48, 0.95), rgba(5, 11, 20, 0.95))",
               backdropFilter: "blur(20px)",
@@ -391,55 +377,752 @@ export default function Home() {
               <span style={{ color: "var(--accent)", fontWeight: 800, fontSize: "14px" }}>
                 ⚙️ LIVE ADMIN & EDITOR MODE
               </span>
+              <span style={{ color: "var(--muted)", fontSize: "12px" }}>
+                Edit fields and publish directly to GitHub!
+              </span>
             </div>
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <button onClick={handleAddExperience} style={{ padding: "8px 14px", background: "rgba(0, 229, 255, 0.1)", border: "1px solid var(--accent)", borderRadius: "10px", color: "var(--accent)", fontSize: "13px", fontWeight: 700 }}><Plus size={15} /> Job</button>
-              <button onClick={handleAddSection} style={{ padding: "8px 14px", background: "rgba(0, 229, 255, 0.1)", border: "1px solid var(--accent)", borderRadius: "10px", color: "var(--accent)", fontSize: "13px", fontWeight: 700 }}><Plus size={15} /> Section</button>
-              <button onClick={saveLocalChanges} style={{ padding: "8px 14px", background: "var(--panel)", border: "1px solid var(--line)", borderRadius: "10px", color: "var(--text)", fontSize: "13px", fontWeight: 700 }}><Save size={15} /> Save</button>
-              <button onClick={pushToGitHub} style={{ padding: "8px 16px", background: "linear-gradient(135deg, var(--accent), var(--accent2))", border: 0, borderRadius: "10px", color: "#050b14", fontSize: "13px", fontWeight: 800 }}><Sparkles size={15} /> Publish Live</button>
+              <button
+                onClick={handleAddExperience}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 14px",
+                  background: "rgba(0, 229, 255, 0.1)",
+                  border: "1px solid var(--accent)",
+                  borderRadius: "10px",
+                  color: "var(--accent)",
+                  fontSize: "13px",
+                  fontWeight: 700
+                }}
+              >
+                <Plus size={15} /> Add Experience
+              </button>
+              <button
+                onClick={saveLocalChanges}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 14px",
+                  background: "var(--panel)",
+                  border: "1px solid var(--line)",
+                  borderRadius: "10px",
+                  color: "var(--text)",
+                  fontSize: "13px",
+                  fontWeight: 700
+                }}
+              >
+                <Save size={15} /> Save Locally
+              </button>
+              <button
+                onClick={pushToGitHub}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 16px",
+                  background: "linear-gradient(135deg, var(--accent), var(--accent2))",
+                  border: 0,
+                  borderRadius: "10px",
+                  color: "#050b14",
+                  fontSize: "13px",
+                  fontWeight: 800
+                }}
+              >
+                <Sparkles size={15} /> Push to GitHub 🚀
+              </button>
+              <button
+                onClick={() => setShowTokenModal(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 12px",
+                  background: "var(--panel)",
+                  border: "1px solid var(--line)",
+                  borderRadius: "10px",
+                  color: "var(--muted)",
+                  fontSize: "13px"
+                }}
+              >
+                <Key size={14} /> Settings & Keys
+              </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Main Content (Bento Grid) */}
+      {/* Push Status Banner */}
+      {pushStatus !== "idle" && (
+        <div style={{
+          padding: "16px 5vw",
+          background: pushStatus === "success" ? "rgba(16, 185, 129, 0.2)" : pushStatus === "error" ? "rgba(239, 68, 68, 0.2)" : "rgba(0, 229, 255, 0.2)",
+          borderBottom: "1px solid var(--line)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px" }}>
+            {pushStatus === "pushing" && <RefreshCw size={18} className="animate-spin" style={{ color: "var(--accent)" }} />}
+            {pushStatus === "success" && <CheckCircle size={18} style={{ color: "var(--emerald)" }} />}
+            {pushStatus === "error" && <AlertCircle size={18} style={{ color: "#ef4444" }} />}
+            <strong>{pushMessage}</strong>
+          </div>
+          <button onClick={() => setPushStatus("idle")}><X size={16} /></button>
+        </div>
+      )}
+
+      {/* Hero Bento Grid */}
       <section className="hero-section">
         <div className="bento-hero-grid">
           <div className="bento-card hero-main">
             <div>
               <span className="eyebrow">SUPPLY CHAIN • PROCUREMENT • PROJECTS</span>
-              <h1 className="hero-title">{profileData.name}</h1>
-              <h2 className="hero-subtitle">{profileData.title}</h2>
-              <p className="hero-tagline">{profileData.summary}</p>
+
+              {isEditor ? (
+                <div style={{ marginTop: "1rem", display: "grid", gap: "10px" }}>
+                  <input
+                    style={{ fontSize: "32px", fontWeight: 900, background: "var(--bg)", border: "1px solid var(--accent)", color: "var(--text)", padding: "8px 12px", borderRadius: "8px" }}
+                    value={profileData.name}
+                    onChange={e => setProfileData({ ...profileData, name: e.target.value })}
+                  />
+                  <input
+                    style={{ fontSize: "18px", fontWeight: 700, background: "var(--bg)", border: "1px solid var(--line)", color: "var(--accent)", padding: "6px 12px", borderRadius: "8px" }}
+                    value={profileData.title}
+                    onChange={e => setProfileData({ ...profileData, title: e.target.value })}
+                  />
+                  <textarea
+                    style={{ fontSize: "14px", background: "var(--bg)", border: "1px solid var(--line)", color: "var(--muted)", padding: "8px 12px", borderRadius: "8px" }}
+                    rows={2}
+                    value={profileData.tagline}
+                    onChange={e => setProfileData({ ...profileData, tagline: e.target.value })}
+                  />
+                </div>
+              ) : (
+                <>
+                  <h1 className="hero-title">{profileData.name}</h1>
+                  <h2 className="hero-subtitle">{profileData.title}</h2>
+                  <p className="hero-tagline">{profileData.tagline}</p>
+                </>
+              )}
+            </div>
+            <div>
+              <div className="hero-btns">
+                <a className="primary-btn" href={`${BASE}/resume.pdf`} download>
+                  <Download size={17} /> Download Resume
+                </a>
+                <a className="secondary-btn" href="#projects">
+                  View Projects <ArrowUpRight size={17} />
+                </a>
+              </div>
+              <div style={{ display: "flex", gap: "1.5rem", marginTop: "2rem", flexWrap: "wrap" }}>
+                <a href={profileData.linkedin} target="_blank" rel="noreferrer" style={{ display: "flex", gap: "8px", alignItems: "center", color: "var(--muted)", fontSize: "13px", fontWeight: 600 }}>
+                  <Linkedin size={16} /> LinkedIn
+                </a>
+                <a href={profileData.github} target="_blank" rel="noreferrer" style={{ display: "flex", gap: "8px", alignItems: "center", color: "var(--muted)", fontSize: "13px", fontWeight: 600 }}>
+                  <Github size={16} /> GitHub
+                </a>
+                <a href={`mailto:${profileData.email}`} style={{ display: "flex", gap: "8px", alignItems: "center", color: "var(--muted)", fontSize: "13px", fontWeight: 600 }}>
+                  <Mail size={16} /> Email
+                </a>
+              </div>
             </div>
           </div>
+
           <div className="bento-card hero-sidebar">
-             <img className="profile-photo" src={`${BASE}/profile-photo.png`} alt="Suresh Ganesan" />
-             <div className="profile-stat"><span>Experience</span><strong>{totalExperienceFormatted}</strong></div>
-             <div className="profile-stat"><span>Qualification</span><strong>B.E. Mechanical Engineering</strong></div>
-             <div className="profile-stat"><span>Global Reach</span><strong>6+ Countries</strong></div>
+            <img className="profile-photo" src={`${BASE}/profile-photo.png`} alt="Suresh Ganesan professional portrait" loading="eager" />
+
+            <div className="profile-stat">
+              <span>Location</span>
+              {isEditor ? (
+                <input
+                  style={{ background: "var(--bg)", border: "1px solid var(--line)", color: "var(--text)", padding: "4px 8px", borderRadius: "6px", fontSize: "13px" }}
+                  value={profileData.location}
+                  onChange={e => setProfileData({ ...profileData, location: e.target.value })}
+                />
+              ) : (
+                <strong>{profileData.location}</strong>
+              )}
+            </div>
+
+            {/* TOTAL EXPERIENCE IN YEARS & MONTHS */}
+            <div className="profile-stat" style={{ background: "rgba(0, 229, 255, 0.05)", padding: "12px", borderRadius: "12px", margin: "6px 0", border: "1px solid rgba(0, 229, 255, 0.2)" }}>
+              <span style={{ color: "var(--accent)" }}>Total Experience</span>
+              <strong style={{ color: "var(--accent)", fontSize: "15px" }}>{totalExperienceFormatted}</strong>
+            </div>
+
+            <div className="profile-stat">
+              <span>Global Reach</span>
+              <strong>{profileData.regions?.length || 6}+ Countries</strong>
+            </div>
+          </div>
+        </div>
+
+        {/* Metrics Strip */}
+        <div className="metrics-grid">
+          <div className="metric-card">
+            <strong>1800 Million</strong>
+            <span>Modernization & Expansion Project (MEP)</span>
+          </div>
+          <div className="metric-card">
+            <strong>1200 Million</strong>
+            <span>AOP (CAPEX & Civil projects)</span>
+          </div>
+          <div className="metric-card">
+            <strong>500 Million</strong>
+            <span>Naidupeta AP fire-damage restoration</span>
+          </div>
+          <div className="metric-card">
+            <strong>35+ / Awards</strong>
+            <span>Kaizens & QCFI Gold / Best Employee</span>
           </div>
         </div>
       </section>
 
-      {/* Render Dynamic Content */}
-      <Section id="about" eyebrow="01 / ABOUT" title={isEditor ? <input value={profileData.name} onChange={e => setProfileData({...profileData, name: e.target.value})}/> : "About Suresh"}>
+      {/* About Bento Section */}
+      <Section id="about" eyebrow="01 / ABOUT ME" title="Commercial thinking, technical depth, operational discipline.">
         <div className="bento-grid-2">
-            {customSections.map(s => (
-                <div key={s.id} className="bento-card col-12">
-                    {isEditor ? <input value={s.title} onChange={e => setCustomSections(customSections.map(cs => cs.id === s.id ? {...cs, title: e.target.value} : cs))}/> : <h3>{s.title}</h3>}
-                    {isEditor ? <textarea value={s.content} onChange={e => setCustomSections(customSections.map(cs => cs.id === s.id ? {...cs, content: e.target.value} : cs))}/> : <p>{s.content}</p>}
-                </div>
-            ))}
+          <div className="bento-card col-7">
+            <span className="eyebrow">Professional Summary</span>
+            {isEditor ? (
+              <textarea
+                style={{ width: "100%", marginTop: "1rem", background: "var(--bg)", border: "1px solid var(--line)", color: "var(--text)", padding: "12px", borderRadius: "10px", fontSize: "15px", lineHeight: 1.6 }}
+                rows={5}
+                value={profileData.summary}
+                onChange={e => setProfileData({ ...profileData, summary: e.target.value })}
+              />
+            ) : (
+              <p className="lead-text" style={{ marginTop: "1rem" }}>{profileData.summary}</p>
+            )}
+            <div className="pill-cloud" style={{ marginTop: "1.5rem" }}>
+              {profileData.regions?.map((region: string) => (
+                <span key={region}>🌍 {region}</span>
+              ))}
+            </div>
+          </div>
+          <div className="bento-card col-5">
+            <span className="eyebrow">Quick Facts</span>
+            <div className="fact-subgrid" style={{ marginTop: "1rem" }}>
+              <div className="mini-fact">
+                <span>Industry</span>
+                <strong>Manufacturing & SCM</strong>
+              </div>
+              <div className="mini-fact">
+                <span>Qualification</span>
+                <strong>B.E. Mechanical</strong>
+              </div>
+              <div className="mini-fact">
+                <span>Core Domain</span>
+                <strong>Technical Procurement</strong>
+              </div>
+              <div className="mini-fact">
+                <span>Languages</span>
+                <strong>Tamil & English</strong>
+              </div>
+            </div>
+          </div>
         </div>
       </Section>
 
-      {/* ... Rest of components ... */}
+      {/* Career Journey */}
+      <Section id="journey" eyebrow="02 / CAREER JOURNEY" title="A procurement career built around projects, suppliers and delivery.">
+        <div className="timeline-container">
+          {expList.map((e, i) => (
+            <motion.div className="timeline-card" key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+              <div className="timeline-header">
+                <div style={{ width: "100%" }}>
+                  {isEditor ? (
+                    <div style={{ display: "grid", gap: "8px", width: "100%", paddingRight: "1rem" }}>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>Start Date:</span>
+                        <input
+                          type="date"
+                          style={{ background: "var(--bg)", border: "1px solid var(--line)", color: "var(--accent)", padding: "4px 8px", borderRadius: "6px" }}
+                          value={e.startDate || ""}
+                          onChange={ev => {
+                            const updated = [...expList];
+                            updated[i].startDate = ev.target.value;
+                            setExpList(updated);
+                          }}
+                        />
+                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>End Date:</span>
+                        <input
+                          type="date"
+                          style={{ background: "var(--bg)", border: "1px solid var(--line)", color: "var(--accent)", padding: "4px 8px", borderRadius: "6px" }}
+                          value={e.endDate || ""}
+                          onChange={ev => {
+                            const updated = [...expList];
+                            updated[i].endDate = ev.target.value.trim() === "" ? null : ev.target.value;
+                            setExpList(updated);
+                          }}
+                        />
+                        <button
+                          style={{ fontSize: "11px", color: "var(--accent)", background: "rgba(0, 229, 255, 0.05)", border: "1px solid var(--line)", padding: "2px 8px", borderRadius: "4px" }}
+                          onClick={() => {
+                            const updated = [...expList];
+                            updated[i].endDate = null;
+                            setExpList(updated);
+                          }}
+                        >
+                          Set Present
+                        </button>
+                      </div>
+                      <input
+                        style={{ fontSize: "18px", fontWeight: 800, background: "var(--bg)", border: "1px solid var(--line)", color: "var(--text)", padding: "6px 10px", borderRadius: "8px" }}
+                        value={e.role}
+                        placeholder="Job Title"
+                        onChange={ev => {
+                          const updated = [...expList];
+                          updated[i].role = ev.target.value;
+                          setExpList(updated);
+                        }}
+                      />
+                      <div style={{ display: "flex", gap: "10px" }}>
+                        <input
+                          style={{ flex: 1, background: "var(--bg)", border: "1px solid var(--line)", color: "var(--muted)", padding: "4px 8px", borderRadius: "6px" }}
+                          value={e.company}
+                          placeholder="Company"
+                          onChange={ev => {
+                            const updated = [...expList];
+                            updated[i].company = ev.target.value;
+                            setExpList(updated);
+                          }}
+                        />
+                        <input
+                          style={{ flex: 1, background: "var(--bg)", border: "1px solid var(--line)", color: "var(--muted)", padding: "4px 8px", borderRadius: "6px" }}
+                          value={e.location}
+                          placeholder="Location"
+                          onChange={ev => {
+                            const updated = [...expList];
+                            updated[i].location = ev.target.value;
+                            setExpList(updated);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div onClick={() => setOpen(open === i ? -1 : i)} style={{ cursor: "pointer" }}>
+                      <span className="date-badge">{e.dates} <span style={{ opacity: 0.7 }}>• {calculateDuration(e.startDate, e.endDate)}</span></span>
+                      <h3>{e.role}</h3>
+                      <p>{e.company} · {e.location}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  {isEditor && (
+                    <button
+                      onClick={() => {
+                        if (confirm(`Remove ${e.company}?`)) {
+                          setExpList(expList.filter((_, idx) => idx !== i));
+                        }
+                      }}
+                      style={{ color: "#ef4444", padding: "8px", background: "rgba(239, 68, 68, 0.1)", borderRadius: "8px" }}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                  <button onClick={() => setOpen(open === i ? -1 : i)}>
+                    <ChevronDown size={20} style={{ transform: open === i ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </button>
+                </div>
+              </div>
+
+              <AnimatePresence>
+                {open === i && (
+                  <motion.div className="timeline-body" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                    {isEditor ? (
+                      <div style={{ marginTop: "1rem", display: "grid", gap: "8px" }}>
+                        <span style={{ fontSize: "12px", color: "var(--muted)" }}>Responsibilities (one per line):</span>
+                        <textarea
+                          style={{ width: "100%", background: "var(--bg)", border: "1px solid var(--line)", color: "var(--text)", padding: "10px", borderRadius: "8px", fontSize: "13px", lineHeight: 1.6 }}
+                          rows={6}
+                          value={e.bullets.join("\n")}
+                          onChange={ev => {
+                            const updated = [...expList];
+                            updated[i].bullets = ev.target.value.split("\n");
+                            setExpList(updated);
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <ul>
+                        {e.bullets.map((b, bIdx) => (
+                          <li key={bIdx}>{b}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+        </div>
+      </Section>
+
+      {/* Core Expertise */}
+      <Section id="expertise" eyebrow="03 / CORE EXPERTISE" title="The operating system behind the work.">
+        <div className="bento-grid-2">
+          <div className="bento-card col-12">
+            <span className="eyebrow">Procurement & SCM Competencies</span>
+            <div className="pill-cloud" style={{ marginTop: "1.25rem" }}>
+              {skillsList.map((s, idx) => (
+                <span key={idx}>
+                  {s}
+                  {isEditor && (
+                    <button
+                      onClick={() => setSkillsList(skillsList.filter((_, i) => i !== idx))}
+                      style={{ marginLeft: "6px", color: "#ef4444" }}
+                    >
+                      ×
+                    </button>
+                  )}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="bento-card col-6" style={{ gridColumn: "span 6" }}>
+            <span className="eyebrow">Software Systems</span>
+            <div className="pill-cloud" style={{ marginTop: "1.25rem" }}>
+              {defaultSoftware.map(s => <span key={s} style={{ background: "rgba(99, 102, 241, 0.05)" }}>💻 {s}</span>)}
+            </div>
+          </div>
+          <div className="bento-card col-6" style={{ gridColumn: "span 6" }}>
+            <span className="eyebrow">Tools & Platforms</span>
+            <div className="pill-cloud" style={{ marginTop: "1.25rem" }}>
+              {defaultTools.map(t => <span key={t} style={{ background: "rgba(16, 185, 129, 0.05)" }}>🛠️ {t}</span>)}
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* Achievements */}
+      <Section id="achievements" eyebrow="04 / ACHIEVEMENTS & RECOGNITION" title="Documented outcomes and industry recognition.">
+        <div className="achievements-grid">
+          {profileData.achievements?.map((a: string, i: number) => (
+            <motion.div className="achievement-bento" key={a} whileHover={{ y: -5 }}>
+              <span>0{i + 1} // AWARD</span>
+              <p>{a}</p>
+            </motion.div>
+          ))}
+        </div>
+      </Section>
+
+      {/* Projects */}
+      <Section id="projects" eyebrow="05 / PROJECTS & ENGAGEMENTS" title="Selected project engagements and verified public work.">
+        <div className="filter-tabs" role="tablist" aria-label="Project filters">
+          {projectFilters.map(f => (
+            <button role="tab" aria-selected={filter === f} className={`filter-tab ${filter === f ? "active" : ""}`} onClick={() => setFilter(f)} key={f}>
+              {f}
+            </button>
+          ))}
+        </div>
+        <div className="projects-grid">
+          {filtered.length ? filtered.map(p => (
+            <article className="project-card" key={p.title}>
+              <div>
+                <div className="project-top">
+                  <span>{p.category}</span>
+                  <ArrowUpRight size={18} />
+                </div>
+                <h3>{p.title}</h3>
+                <p>{p.description}</p>
+                <div className="project-tags">
+                  {p.technologies.map(t => <span key={t}>{t}</span>)}
+                </div>
+              </div>
+              {p.github && (
+                <a href={p.github} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "var(--accent)", fontSize: "13px", fontWeight: 700 }}>
+                  View Repository <ExternalLink size={14} />
+                </a>
+              )}
+            </article>
+          )) : (
+            <div className="bento-card" style={{ gridColumn: "1/-1", textAlign: "center", color: "var(--muted)" }}>
+              No resume-verified project has been documented for this filter yet.
+            </div>
+          )}
+        </div>
+      </Section>
+
+      {/* GitHub Section */}
+      <Section id="github" eyebrow="06 / GITHUB ACTIVITY" title="Public repository activity and code contributions.">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "2rem", flexWrap: "wrap", gap: "1rem" }}>
+          <p style={{ color: "var(--muted)", maxWidth: "600px", margin: 0 }}>
+            Repositories are loaded live from GitHub's public API for user <strong>{profileData.githubUsername}</strong>.
+          </p>
+          <a className="secondary-btn" href={profileData.githubProfile} target="_blank" rel="noreferrer">
+            <Github size={16} /> Open GitHub Profile
+          </a>
+        </div>
+        {repoStatus === "loading" && <div className="bento-card" style={{ textAlign: "center", color: "var(--muted)" }}>Loading public repositories…</div>}
+        {repoStatus === "error" && <div className="bento-card" style={{ textAlign: "center", color: "var(--muted)" }}>GitHub repository data could not be loaded right now.</div>}
+        {repoStatus === "ready" && (
+          <div className="repo-grid">
+            {repos.length ? repos.map(r => (
+              <a className="repo-card" href={r.html_url} target="_blank" rel="noreferrer" key={r.id}>
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", color: "var(--accent)", fontSize: "11px", fontWeight: 700, textTransform: "uppercase" }}>
+                    <span>{r.language || "Public Repository"}</span>
+                    <Github size={16} />
+                  </div>
+                  <h3>{r.name}</h3>
+                  <p>{r.description || "No public description supplied."}</p>
+                </div>
+                <small style={{ color: "var(--muted)", fontSize: "12px" }}>★ {r.stargazers_count} · Updated {new Date(r.updated_at).toLocaleDateString()}</small>
+              </a>
+            )) : (
+              <div className="bento-card" style={{ gridColumn: "1/-1", textAlign: "center", color: "var(--muted)" }}>No public repositories were returned by the GitHub API.</div>
+            )}
+          </div>
+        )}
+      </Section>
+
+      {/* Education */}
+      <Section id="education" eyebrow="07 / EDUCATION & CERTIFICATIONS" title="Engineering foundation and continuous professional training.">
+        <div className="bento-grid-2">
+          <div className="bento-card col-7">
+            <span className="eyebrow">Academic Background</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", marginTop: "1.5rem" }}>
+              {defaultEducation.map(e => (
+                <div key={e.degree} style={{ paddingBottom: "1.25rem", borderBottom: "1px solid var(--line)" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--accent)" }}>{e.year}</span>
+                  <h3 style={{ fontSize: "18px", fontWeight: 800, margin: "4px 0" }}>{e.degree}</h3>
+                  <p style={{ color: "var(--muted)", margin: 0, fontSize: "14px" }}>{e.institution}</p>
+                  <strong style={{ fontSize: "13px", marginTop: "4px", display: "block" }}>{e.detail}</strong>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bento-card col-5">
+            <span className="eyebrow">Certifications</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1.5rem" }}>
+              {defaultCertifications.map(c => (
+                <div key={c} style={{ padding: "1.25rem", background: "rgba(255,255,255,0.02)", border: "1px solid var(--line)", borderRadius: "14px", fontWeight: 700 }}>
+                  🏆 {c}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* Contact */}
+      <Section id="contact" eyebrow="08 / CONTACT" title="Let's connect around procurement, SCM and project delivery.">
+        <div className="contact-grid">
+          <div className="contact-info-list">
+            <a className="contact-item" href={`mailto:${profileData.email}`}>
+              <Mail size={20} style={{ color: "var(--accent)" }} />
+              <span>{profileData.email}</span>
+            </a>
+            {profileData.phones?.map((p: string) => (
+              <a className="contact-item" href={`tel:${p.replace(/\s/g, "")}`} key={p}>
+                <Phone size={20} style={{ color: "var(--accent)" }} />
+                <span>{p}</span>
+              </a>
+            ))}
+            <div className="contact-item">
+              <MapPin size={20} style={{ color: "var(--accent)" }} />
+              <span>{profileData.location}</span>
+            </div>
+            <a className="contact-item" href={profileData.linkedin} target="_blank" rel="noreferrer">
+              <Linkedin size={20} style={{ color: "var(--accent)" }} />
+              <span>LinkedIn Profile</span>
+            </a>
+            <a className="contact-item" href={profileData.github} target="_blank" rel="noreferrer">
+              <Github size={20} style={{ color: "var(--accent)" }} />
+              <span>GitHub Profile</span>
+            </a>
+          </div>
+
+          <form className="contact-form" action={`mailto:${profileData.email}`} method="post" encType="text/plain">
+            <label>
+              Your Name
+              <input name="name" required placeholder="Name" />
+            </label>
+            <label>
+              Your Email
+              <input name="email" type="email" required placeholder="you@example.com" />
+            </label>
+            <label>
+              Message
+              <textarea name="message" rows={5} required placeholder="How can we connect?" />
+            </label>
+            <button className="primary-btn" type="submit" style={{ justifyContent: "center", width: "100%" }}>
+              <Send size={16} /> Send via Email
+            </button>
+          </form>
+        </div>
+      </Section>
+
+      {/* Footer */}
+      <footer>
+        <span>© {new Date().getFullYear()} {profileData.name}. All rights reserved.</span>
+        <span>Supply Chain · Procurement · Projects</span>
+      </footer>
+
+      {/* Floating Action Buttons */}
+      {showTop && (
+        <button className="back-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Back to top">
+          ↑
+        </button>
+      )}
+      <a className="float-resume" href={`${BASE}/resume.pdf`} download>
+        <Download size={16} /> Resume PDF
+      </a>
+
+      {/* Admin Authorization Prompt Modal */}
+      <AnimatePresence>
+        {showAuthModal && (
+          <div className="modal-backdrop">
+            <motion.div className="recruiter-modal" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+              <button className="modal-close" onClick={() => setShowAuthModal(false)} aria-label="Close modal">
+                <X size={18} />
+              </button>
+              <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+                <Lock size={40} style={{ color: "var(--accent)", margin: "0 auto 10px" }} />
+                <h2 style={{ fontSize: "24px", fontWeight: 900 }}>Admin Passkey Required</h2>
+                <p style={{ color: "var(--muted)", fontSize: "14px" }}>Please enter your authorization phrase to enable editing.</p>
+              </div>
+              <div style={{ display: "grid", gap: "10px", marginBottom: "1.5rem" }}>
+                <input
+                  type="password"
+                  style={{ width: "100%", padding: "12px", background: "var(--bg)", border: "1px solid var(--accent)", borderRadius: "10px", color: "var(--text)" }}
+                  value={authKeyInput}
+                  placeholder="Enter access key..."
+                  onKeyDown={e => e.key === "Enter" && handleAuthSubmit()}
+                  onChange={e => setAuthKeyInput(e.target.value)}
+                />
+              </div>
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                <button className="secondary-btn" onClick={() => setShowAuthModal(false)}>Cancel</button>
+                <button className="primary-btn" onClick={handleAuthSubmit}>Unlock Editor</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Token & Security Settings Modal */}
+      <AnimatePresence>
+        {showTokenModal && (
+          <div className="modal-backdrop">
+            <motion.div className="recruiter-modal" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+              <button className="modal-close" onClick={() => setShowTokenModal(false)} aria-label="Close modal">
+                <X size={18} />
+              </button>
+              <span className="eyebrow">WEB ADMIN CONFIGURATION</span>
+              <h2 style={{ fontSize: "24px", fontWeight: 900, margin: "8px 0 12px 0" }}>Security Settings & Keys</h2>
+
+              {/* GitHub PAT Storage Description */}
+              <div style={{ padding: "12px", background: "rgba(0, 229, 255, 0.05)", borderRadius: "12px", border: "1px solid rgba(0, 229, 255, 0.2)", fontSize: "13px", lineHeight: 1.5, marginBottom: "1.5rem" }}>
+                💡 <strong>Persistent Token Security:</strong> You only need to paste your GitHub Access Token <strong>once</strong>. The browser saves it securely in your device's <code>localStorage</code>, so you don't have to copy-paste it every time you edit!
+              </div>
+
+              <div style={{ display: "grid", gap: "15px", marginBottom: "1.5rem" }}>
+                <label style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700, display: "grid", gap: "6px" }}>
+                  GitHub Personal Access Token:
+                  <input
+                    type="password"
+                    style={{ padding: "12px", background: "var(--bg)", border: "1px solid var(--line)", borderRadius: "10px", color: "var(--text)" }}
+                    value={githubToken}
+                    placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                    onChange={e => setGithubToken(e.target.value)}
+                  />
+                </label>
+
+                <label style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 700, display: "grid", gap: "6px" }}>
+                  Customize Admin Passkey (Auth Key):
+                  <input
+                    type="text"
+                    style={{ padding: "12px", background: "var(--bg)", border: "1px solid var(--line)", borderRadius: "10px", color: "var(--text)" }}
+                    value={savedAuthKey}
+                    placeholder="SureshAdmin123"
+                    onChange={e => setSavedAuthKey(e.target.value)}
+                  />
+                </label>
+              </div>
+
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                <button
+                  className="secondary-btn"
+                  onClick={() => {
+                    localStorage.removeItem("sg_github_token");
+                    localStorage.removeItem("sg_auth_key");
+                    setGithubToken("");
+                    setSavedAuthKey("SureshAdmin123");
+                    setShowTokenModal(false);
+                    alert("Settings cleared.");
+                  }}
+                >
+                  Reset Defaults
+                </button>
+                <button
+                  className="primary-btn"
+                  onClick={() => {
+                    localStorage.setItem("sg_github_token", githubToken);
+                    localStorage.setItem("sg_auth_key", savedAuthKey);
+                    setShowTokenModal(false);
+                    alert("Settings saved successfully to browser local storage!");
+                  }}
+                >
+                  Save Settings
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Recruiter Modal */}
+      <AnimatePresence>
+        {recruiter && (
+          <div className="modal-backdrop">
+            <motion.div className="recruiter-modal" initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}>
+              <button className="modal-close" onClick={() => setRecruiter(false)} aria-label="Close modal">
+                <X size={18} />
+              </button>
+              <span className="eyebrow">30-SECOND RECRUITER PROFILE</span>
+              <h2 style={{ fontSize: "28px", fontWeight: 900, margin: "8px 0 4px 0" }}>{profileData.name}</h2>
+              <p style={{ color: "var(--muted)", fontSize: "16px", marginBottom: "2rem" }}>{profileData.title}</p>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
+                <div className="mini-fact">
+                  <span>Total Experience</span>
+                  <strong style={{ color: "var(--accent)" }}>{totalExperienceFormatted}</strong>
+                </div>
+                <div className="mini-fact">
+                  <span>Latest Role</span>
+                  <strong>{expList[0]?.company || ""}</strong>
+                </div>
+                <div className="mini-fact" style={{ gridColumn: "span 2" }}>
+                  <span>Global Coverage</span>
+                  <strong>{profileData.regions?.join(" · ")}</strong>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+                <a className="primary-btn" href={`${BASE}/resume.pdf`} download>
+                  <Download size={16} /> Download Resume
+                </a>
+                <a className="secondary-btn" href={profileData.linkedin} target="_blank" rel="noreferrer">
+                  <Linkedin size={16} /> LinkedIn
+                </a>
+                <a className="secondary-btn" href={`mailto:${profileData.email}`}>
+                  <Mail size={16} /> Email
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
 
-function Section({ id, eyebrow, title, children }: { id: string; eyebrow: string; title: React.ReactNode; children: React.ReactNode }) {
+function Section({ id, eyebrow, title, children }: { id: string; eyebrow: string; title: string; children: React.ReactNode }) {
   return (
     <section id={id} className="section wrap">
       <div className="section-header">
