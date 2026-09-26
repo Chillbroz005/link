@@ -45,6 +45,7 @@ type GithubRepo = {
   fork: boolean;
 };
 
+// Always returns Years AND Months (e.g. "9 Years, 1 Month" or "9 Years, 0 Months")
 function calculateTotalExperience(experiences: ExperienceItem[]): string {
   let totalMonths = 0;
   for (const exp of experiences) {
@@ -68,11 +69,10 @@ function calculateTotalExperience(experiences: ExperienceItem[]): string {
   const years = Math.floor(totalMonths / 12);
   const remainingMonths = totalMonths % 12;
 
-  const parts: string[] = [];
-  if (years > 0) parts.push(`${years} ${years === 1 ? "Year" : "Years"}`);
-  if (remainingMonths > 0 || years === 0) parts.push(`${remainingMonths} ${remainingMonths === 1 ? "Month" : "Months"}`);
+  const yearStr = `${years} ${years === 1 ? "Year" : "Years"}`;
+  const monthStr = `${remainingMonths} ${remainingMonths === 1 ? "Month" : "Months"}`;
 
-  return parts.join(", ");
+  return `${yearStr}, ${monthStr}`;
 }
 
 export default function Home() {
@@ -94,7 +94,7 @@ export default function Home() {
 
   // Auth & Token Security states
   const [authKeyInput, setAuthKeyInput] = useState("");
-  const [savedAuthKey, setSavedAuthKey] = useState("SureshAdmin123"); // Default fallback
+  const [savedAuthKey, setSavedAuthKey] = useState("SureshAdmin123");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [githubToken, setGithubToken] = useState("");
   const [showTokenModal, setShowTokenModal] = useState(false);
@@ -173,10 +173,8 @@ export default function Home() {
   // Handle Edit Mode click
   const handleEditModeToggle = () => {
     if (isEditor) {
-      // If already open, just close it
       setIsEditor(false);
     } else {
-      // Prompt for authorization key before enabling edit mode
       setShowAuthModal(true);
     }
   };
@@ -248,7 +246,7 @@ export default function Home() {
       const fileData = await getRes.json();
       const currentSha = fileData.sha;
 
-      // 2. Generate updated TS code (incorporates customized auth keys securely)
+      // 2. Generate updated TS code
       const updatedCode = `export const profile = ${JSON.stringify(profileData, null, 2)} as const;\n\nexport type ExperienceItem = {\n  company: string;\n  role: string;\n  location: string;\n  dates: string;\n  startDate: string;\n  endDate: string | null;\n  bullets: string[];\n};\n\nexport const experience: ExperienceItem[] = ${JSON.stringify(expList, null, 2)};\n\nexport const engagements = ${JSON.stringify(defaultEngagements, null, 2)};\n\nexport const skills = ${JSON.stringify(skillsList, null, 2)};\n\nexport const software = ${JSON.stringify(defaultSoftware, null, 2)};\n\nexport const tools = ${JSON.stringify(defaultTools, null, 2)};\n\nexport const education = ${JSON.stringify(defaultEducation, null, 2)};\n\nexport const certifications = ${JSON.stringify(defaultCertifications, null, 2)};\n\nexport const projects = ${JSON.stringify(defaultProjects, null, 2)};\n`;
 
       // 3. Encode to base64
@@ -526,7 +524,7 @@ export default function Home() {
               )}
             </div>
 
-            {/* DYNAMIC EXPERIENCE IN YEARS & MONTHS (LESS GAPS) */}
+            {/* TOTAL EXPERIENCE IN YEARS & MONTHS */}
             <div className="profile-stat" style={{ background: "rgba(0, 229, 255, 0.05)", padding: "12px", borderRadius: "12px", margin: "6px 0", border: "1px solid rgba(0, 229, 255, 0.2)" }}>
               <span style={{ color: "var(--accent)" }}>Total Experience</span>
               <strong style={{ color: "var(--accent)", fontSize: "15px" }}>{totalExperienceFormatted}</strong>
@@ -589,12 +587,12 @@ export default function Home() {
                 <strong>Manufacturing & SCM</strong>
               </div>
               <div className="mini-fact">
-                <span>Calculated Experience</span>
-                <strong style={{ color: "var(--accent)" }}>{totalExperienceFormatted}</strong>
+                <span>Qualification</span>
+                <strong>B.E. Mechanical</strong>
               </div>
               <div className="mini-fact">
-                <span>Engineering</span>
-                <strong>B.E. Mechanical</strong>
+                <span>Core Domain</span>
+                <strong>Technical Procurement</strong>
               </div>
               <div className="mini-fact">
                 <span>Languages</span>
@@ -1059,7 +1057,7 @@ export default function Home() {
       <AnimatePresence>
         {recruiter && (
           <div className="modal-backdrop">
-            <motion.div className="recruiter-modal" initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}>
+            <motion.div className="recruiter-modal" initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}>
               <button className="modal-close" onClick={() => setRecruiter(false)} aria-label="Close modal">
                 <X size={18} />
               </button>
@@ -1069,7 +1067,7 @@ export default function Home() {
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1rem", marginBottom: "2rem" }}>
                 <div className="mini-fact">
-                  <span>Calculated Experience</span>
+                  <span>Total Experience</span>
                   <strong style={{ color: "var(--accent)" }}>{totalExperienceFormatted}</strong>
                 </div>
                 <div className="mini-fact">
