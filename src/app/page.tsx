@@ -7,10 +7,10 @@ import {
   ArrowUpRight, BriefcaseBusiness, ChevronDown, Download, ExternalLink, Github,
   Linkedin, Mail, MapPin, Menu, Moon, Phone, Send, Sun, X
 } from "lucide-react";
-import { profile, experience, engagements, skills, software, education, certifications, projects } from "../data/profile";
+import { profile, experience, engagements, skills, software, tools, education, certifications, projects } from "../data/profile";
 
 const nav = [["about","About"],["journey","Journey"],["expertise","Expertise"],["achievements","Achievements"],["projects","Projects"],["education","Education"],["contact","Contact"]];
-const projectFilters = ["All","Python","Automation","Android","Procurement","Other"];
+const projectFilters = ["All","Procurement","Automation","Android","Other"];
 
 type GithubRepo = {
   id:number; name:string; html_url:string; description:string|null; language:string|null;
@@ -58,9 +58,7 @@ export default function Home(){
 
   const filtered=useMemo(()=>{
     if(filter==="All") return projects;
-    if(filter==="Procurement") return projects.filter(p=>p.category==="Procurement");
-    if(filter==="Python") return projects.filter(p=>p.technologies.includes("Python"));
-    return [];
+    return projects.filter(p=>p.category===filter);
   },[filter]);
 
   return <main>
@@ -110,7 +108,7 @@ export default function Home(){
     </section>
 
     <Section id="about" eyebrow="01 / ABOUT ME" title="Commercial thinking, technical depth, operational discipline.">
-      <div className="twoCol"><p className="lead">Dynamic and results-oriented SCM Professional with 9 years of experience in vertically integrated manufacturing. Experienced in procurement strategy, supplier performance, cost-effective contracts, cross-functional collaboration and continuous improvement.</p><div className="factGrid"><Fact label="Industry" value="Vertically integrated manufacturing"/><Fact label="Languages" value="Tamil & English"/><Fact label="Engineering" value="Mechanical Engineering"/><Fact label="Focus" value="Technical + Commercial Procurement"/></div></div>
+      <div className="twoCol"><p className="lead">{profile.summary}</p><div className="factGrid"><Fact label="Industry" value="Vertically integrated manufacturing"/><Fact label="Languages" value="Tamil & English"/><Fact label="Engineering" value="Mechanical Engineering"/><Fact label="Focus" value="Technical + Commercial Procurement"/></div></div>
     </Section>
 
     <Section id="journey" eyebrow="02 / CAREER JOURNEY" title="A procurement career built around projects, suppliers and delivery.">
@@ -125,7 +123,8 @@ export default function Home(){
 
     <Section id="expertise" eyebrow="03 / CORE EXPERTISE" title="The operating system behind the work.">
       <div className="skillCloud">{skills.map(s=><span key={s}>{s}</span>)}</div>
-      <h3 className="subhead">Tools & Technologies</h3><div className="software">{software.map(s=><span key={s}>{s}</span>)}</div>
+      <h3 className="subhead">Software</h3><div className="software">{software.map(s=><span key={s}>{s}</span>)}</div>
+      <h3 className="subhead">Tools</h3><div className="software">{tools.map(s=><span key={s}>{s}</span>)}</div>
     </Section>
 
     <Section id="achievements" eyebrow="04 / ACHIEVEMENTS" title="Documented outcomes and recognition.">
